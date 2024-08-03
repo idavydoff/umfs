@@ -9,23 +9,23 @@
 typedef struct User {
     char *name;
     uid_t uid;
-	char *shell;
-	char *dir;
+    char *shell;
+    char *dir;
 }User;
 
 typedef struct State {
     struct User **users;
-	int users_count;
+    int users_count;
     struct Group **groups;
-	int groups_count;
+    int groups_count;
 }State;
 
 typedef struct Group {
     char *name;
     uid_t gid;
-	char *password;
-	char **members;
-	int members_count;
+    char *password;
+    char **members;
+    int members_count;
 }Group;
 
 extern struct State state;
