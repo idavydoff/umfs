@@ -8,14 +8,18 @@
 void free_user(struct User *user) {
     if (user) {
         free(user->name);
+        user->name = NULL;
         free(user->shell);
+        user->shell = NULL;
         free(user->dir);
+        user->dir = NULL;
         free(user);
+        user = NULL;
     }
 }
 
 void get_users() {
-    int capacity = 20;
+    int capacity = state.users_count != 0 ? state.users_count : 20;
     if (state.users) {
         capacity = state.users_count;
         for (int i = 0; i < state.users_count; i++) {

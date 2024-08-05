@@ -8,19 +8,24 @@
 void free_group(struct Group *group) {
     if (group) {
         free(group->name);
+        group->name = NULL;
         free(group->password);
+        group->password = NULL;
 
         for (int i = 0; i < group->members_count; i++) {
             free(group->members[i]);
+            group->members[i] = NULL;
         }
         free(group->members);
+        group->members = NULL;
 
         free(group);
+        group = NULL;
     }
 }
 
 void get_groups() {
-    int capacity = 20;
+    int capacity = state.groups_count != 0 ? 20 : state.groups_count;
     if (state.groups) {
         capacity = state.groups_count;
         for (int i = 0; i < state.groups_count; i++) {

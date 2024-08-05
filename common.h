@@ -1,7 +1,7 @@
 #include <stdbool.h>
 
-#ifndef UTILS   /* Include guard */
-#define UTILS
+#ifndef COMMOn   /* Include guard */
+#define COMMOn
 
 #define OPTION(t, p)                           \
     { t, offsetof(struct options, p), 1 }
@@ -29,6 +29,7 @@ typedef struct Group {
 }Group;
 
 extern struct State state;
+extern pthread_mutex_t state_data_mutex;
 
 int get_dynamic_string_size(char *str);
 bool startsWith(const char *a, const char *b);
