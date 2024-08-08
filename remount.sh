@@ -3,4 +3,4 @@ gcc -Wall -g -fsanitize=address  utils.c users.c groups.c umfs.c `pkg-config fus
 mkdir test-fs 2>/dev/null
 umount ./test-fs 2>/dev/null
 echo "Running..."
-./umfs ./test-fs
+./umfs ./test-fs -f

@@ -1,4 +1,4 @@
-#ifndef GROUPS   /* Include guard */
+#ifndef GROUPS /* Include guard */
 #define GROUPS
 
 void free_group(struct User *user);
