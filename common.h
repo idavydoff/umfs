@@ -1,32 +1,34 @@
 #include <stdbool.h>
+#include <glib.h>
 
-#ifndef COMMOn   /* Include guard */
-#define COMMOn
+#ifndef COMMON /* Include guard */
+#define COMMON
 
-#define OPTION(t, p)                           \
-    { t, offsetof(struct options, p), 1 }
+#define OPTION(t, p) \
+    {t, offsetof(struct options, p), 1}
 
-typedef struct User {
+typedef struct User
+{
     char *name;
     uid_t uid;
     char *shell;
     char *dir;
-}User;
+} User;
 
-typedef struct State {
-    struct User **users;
-    int users_count;
-    struct Group **groups;
-    int groups_count;
-}State;
-
-typedef struct Group {
+typedef struct Group
+{
     char *name;
     uid_t gid;
     char *password;
     char **members;
     int members_count;
-}Group;
+} Group;
+
+typedef struct State
+{
+    GHashTable *users;
+    GHashTable *groups;
+} State;
 
 extern struct State state;
 extern pthread_mutex_t state_data_mutex;
@@ -34,5 +36,6 @@ extern pthread_mutex_t state_data_mutex;
 int get_dynamic_string_size(char *str);
 bool startsWith(const char *a, const char *b);
 int string_ends_with(const char *str, const char *suffix);
+char *get_item_name_from_path(const char *path, char *offset);
 
 #endif
