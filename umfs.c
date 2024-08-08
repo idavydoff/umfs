@@ -1,6 +1,8 @@
 #define FUSE_USE_VERSION 31
 
 #include <fuse.h>
+#include <glib.h>
+
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -310,8 +312,21 @@ int main(int argc, char *argv[])
         args.argv[0][0] = '\0';
     }
 
-    ret = fuse_main(args.argc, args.argv, &umfs_oper, NULL);
-    fuse_opt_free_args(&args);
+	// HashTable Example
+	// GHashTable *hashTable = g_hash_table_new(g_str_hash, g_str_equal);
+
+	// g_hash_table_insert(hashTable, "Jazzy", "Cheese");
+	// g_hash_table_insert(hashTable, "Mr Darcy", "Treats");
+
+	// printf("There are %d keys in the hash table\n", g_hash_table_size(hashTable));
+
+	// printf("Jazzy likes %s\n", g_hash_table_lookup(hashTable, "Jazzy"));
+
+	// g_hash_table_destroy(hashTable);
+
+
+	ret = fuse_main(args.argc, args.argv, &umfs_oper, NULL);
+	fuse_opt_free_args(&args);
     pthread_mutex_destroy(&state_data_mutex);
-    return ret;
+	return ret;
 }

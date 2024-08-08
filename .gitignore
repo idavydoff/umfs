@@ -1,2 +1,5 @@
 test-fs
 umfs
+.devcontainer
+.github
+.vscode
