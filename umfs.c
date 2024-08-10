@@ -47,6 +47,7 @@ static void *umfs_init(struct fuse_conn_info *conn,
 
 static int umfs_readlink(const char *path, char *buf, size_t buf_size)
 {
+    printf("Read link: %s\n", path);
     char newpath[buf_size];
     char *path_dup = strdup(path);
 
@@ -67,9 +68,9 @@ static int umfs_readlink(const char *path, char *buf, size_t buf_size)
 
         // TODO: урезать новый путь, если он не влезает в newpath[buf_size].
         // (Как урезать чтобы симлинк продолжал резолвиться в правильный путь? Хуй его знает)
-        sprintf(newpath, "%s/groups/%s", ABSOLUTE_MOUNT_PATH, group_name);
+        sprintf(newpath, "%s/groups/%s\0", ABSOLUTE_MOUNT_PATH, group_name);
         free(path_dup);
-        memcpy(buf, newpath, strlen(newpath));
+        memcpy(buf, newpath, strlen(newpath) + 1);
     }
     if (startsWith(path, "/groups/"))
     {
@@ -88,9 +89,9 @@ static int umfs_readlink(const char *path, char *buf, size_t buf_size)
 
         // TODO: урезать новый путь, если он не влезает в newpath[buf_size].
         // (Как урезать чтобы симлинк продолжал резолвиться в правильный путь? Хуй его знает)
-        sprintf(newpath, "%s/users/%s", ABSOLUTE_MOUNT_PATH, member_name);
+        sprintf(newpath, "%s/users/%s\0", ABSOLUTE_MOUNT_PATH, member_name);
         free(path_dup);
-        memcpy(buf, newpath, strlen(newpath));
+        memcpy(buf, newpath, strlen(newpath) + 1);
     }
 
     return 0;
@@ -396,6 +397,17 @@ static int umfs_open(const char *path, struct fuse_file_info *fi)
     return 0;
 }
 
+static int umfs_opendir(const char *path, struct fuse_file_info *fi)
+{
+    printf("Open dir: %s\n", path);
+    if ((fi->flags & O_ACCMODE) != O_RDONLY)
+        return -EACCES;
+
+    fi->keep_cache = 1;
+
+    return 0;
+}
+
 static int umfs_read(const char *path, char *buf, size_t size, off_t offset,
                      struct fuse_file_info *fi)
 {
@@ -489,6 +501,7 @@ static const struct fuse_operations umfs_oper = {
     .getattr = umfs_getattr,
     .readdir = umfs_readdir,
     .open = umfs_open,
+    .opendir = umfs_opendir,
     .read = umfs_read,
     .readlink = umfs_readlink,
 };
