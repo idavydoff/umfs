@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
+#include <stdio.h>
 
 #include "common.h"
 
@@ -63,6 +64,13 @@ void get_groups()
         new_group->members = malloc(members_capacity * sizeof(char *));
         new_group->members_count = 0;
 
+        User *user = g_hash_table_lookup(state.users, grp->gr_name);
+        if (user)
+        {
+            new_group->members[0] = strdup(grp->gr_name);
+            new_group->members_count++;
+        }
+
         while (*grp->gr_mem)
         {
             if (new_group->members_count >= members_capacity)
@@ -70,9 +78,10 @@ void get_groups()
                 members_capacity += 10;
                 new_group->members = realloc(new_group->members, members_capacity * sizeof(char *));
             }
-            new_group->members[new_group->members_count] = strdup(grp->gr_mem[new_group->members_count]);
 
-            User *user = g_hash_table_lookup(state.users, grp->gr_mem[new_group->members_count]);
+            new_group->members[new_group->members_count] = strdup(*grp->gr_mem);
+
+            User *user = g_hash_table_lookup(state.users, *grp->gr_mem);
             if ((user->groups_count + 1) % 5 == 1)
             {
                 user->groups = realloc(user->groups, (user->groups_count + 5) * sizeof(char *));
