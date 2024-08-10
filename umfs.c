@@ -9,11 +9,13 @@
 #include <fcntl.h>
 #include <stddef.h>
 #include <assert.h>
+#include <limits.h> /* PATH_MAX */
 
 #include <grp.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <pwd.h>
 #include <pthread.h>
 
@@ -22,6 +24,7 @@
 #include "groups.h"
 
 struct State state = {NULL, NULL};
+char ABSOLUTE_MOUNT_PATH[PATH_MAX];
 pthread_mutex_t state_data_mutex;
 
 static struct options
@@ -40,6 +43,33 @@ static void *umfs_init(struct fuse_conn_info *conn,
     (void)conn;
     cfg->kernel_cache = 1;
     return NULL;
+}
+
+static int umfs_readlink(const char *path, char *buf, size_t buf_size)
+{
+    char newpath[buf_size];
+
+    char *path_dup = strdup(path);
+    char *member_name = path_dup + strlen("/groups/");
+    bool loop = true;
+    while (loop)
+    {
+        if (startsWith(member_name, "/members"))
+        {
+            member_name += strlen("/members/");
+            loop = false;
+            break;
+        }
+        member_name++;
+    }
+
+    // TODO: урезать новый путь, если он не влезает в newpath[buf_size].
+    // (Как урезать чтобы симлинк продолжал резолвиться в правильный путь? Хуй его знает)
+    sprintf(newpath, "%s/users/%s", ABSOLUTE_MOUNT_PATH, member_name);
+    free(path_dup);
+    memcpy(buf, newpath, strlen(newpath));
+
+    return 0;
 }
 
 static int umfs_getattr(const char *path, struct stat *stbuf,
@@ -88,7 +118,7 @@ static int umfs_getattr(const char *path, struct stat *stbuf,
 
             strcat(name, "/");
 
-            if (startsWith(path + 7, name))
+            if (startsWith(path + strlen("/users/"), name))
             {
                 stbuf->st_mode = S_IFREG | 0666;
                 stbuf->st_nlink = 1;
@@ -137,13 +167,13 @@ static int umfs_getattr(const char *path, struct stat *stbuf,
 
             strcat(name, "/");
 
-            char members_dir_name[58];
+            char members_dir_name[NAME_MAX + strlen("/members")];
             strcpy(members_dir_name, group->name);
             strcat(members_dir_name, "/members");
 
-            if (startsWith(path + 8, name))
+            if (startsWith(path + strlen("/groups/"), name))
             {
-                if (strcmp(path + 8, members_dir_name) == 0)
+                if (strcmp(path + strlen("/groups/"), members_dir_name) == 0)
                 {
                     stbuf->st_mode = S_IFDIR | 0755;
                     stbuf->st_nlink = 2;
@@ -151,6 +181,16 @@ static int umfs_getattr(const char *path, struct stat *stbuf,
                     pthread_mutex_unlock(&state_data_mutex);
                     return 0;
                 }
+
+                if (startsWith(path + strlen("/groups/"), members_dir_name))
+                {
+                    stbuf->st_mode = S_IFLNK | 0666;
+                    stbuf->st_nlink = 1;
+
+                    pthread_mutex_unlock(&state_data_mutex);
+                    return 0;
+                }
+
                 stbuf->st_mode = S_IFREG | 0666;
                 stbuf->st_nlink = 1;
                 stbuf->st_size = 100; // TODO убрать
@@ -207,7 +247,6 @@ static int umfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 
         while (users_list_ptr)
         {
-            printf("%s\n", users_list_ptr->data);
             filler(buf, users_list_ptr->data, NULL, 0, 0);
             users_list_ptr = users_list_ptr->next;
         }
@@ -243,7 +282,6 @@ static int umfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 
         filler(buf, "gid", NULL, 0, 0);
         filler(buf, "name", NULL, 0, 0);
-        filler(buf, "password", NULL, 0, 0);
         filler(buf, "members", NULL, 0, 0);
 
         pthread_mutex_unlock(&state_data_mutex);
@@ -333,6 +371,39 @@ static int umfs_read(const char *path, char *buf, size_t size, off_t offset,
         return size;
     }
 
+    if (startsWith(path, "/groups/"))
+    {
+        char *name = get_item_name_from_path(path, "/groups/");
+        struct Group *group = g_hash_table_lookup(state.groups, name);
+
+        if (group == NULL)
+        {
+            pthread_mutex_unlock(&state_data_mutex);
+            return -ENOENT;
+        }
+
+        char buffer[200];
+        if (string_ends_with(path, "gid") != 0)
+        {
+            snprintf(buffer, sizeof(buffer), "%d\n", group->gid);
+        }
+        if (string_ends_with(path, "name") != 0)
+        {
+            snprintf(buffer, sizeof(buffer), "%s\n", group->name);
+        }
+        len = strlen(buffer);
+        if (offset < len)
+        {
+            if (offset + size > len)
+                size = len - offset;
+            memcpy(buf, buffer + offset, size);
+        }
+        else
+            size = 0;
+        pthread_mutex_unlock(&state_data_mutex);
+        return size;
+    }
+
     pthread_mutex_unlock(&state_data_mutex);
     return -ENOENT;
 }
@@ -343,6 +414,7 @@ static const struct fuse_operations umfs_oper = {
     .readdir = umfs_readdir,
     .open = umfs_open,
     .read = umfs_read,
+    .readlink = umfs_readlink,
 };
 
 static void show_help(const char *progname)
@@ -368,6 +440,8 @@ int main(int argc, char *argv[])
         assert(fuse_opt_add_arg(&args, "--help") == 0);
         args.argv[0][0] = '\0';
     }
+
+    realpath(argv[1], ABSOLUTE_MOUNT_PATH);
 
     ret = fuse_main(args.argc, args.argv, &umfs_oper, NULL);
     fuse_opt_free_args(&args);

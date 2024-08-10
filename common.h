@@ -19,7 +19,6 @@ typedef struct Group
 {
     char *name;
     uid_t gid;
-    char *password;
     char **members;
     int members_count;
 } Group;

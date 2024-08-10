@@ -12,8 +12,6 @@ void free_group(struct Group *group)
     {
         free(group->name);
         group->name = NULL;
-        free(group->password);
-        group->password = NULL;
 
         for (int i = 0; i < group->members_count; i++)
         {
@@ -60,7 +58,6 @@ void get_groups()
 
         new_group->gid = grp->gr_gid;
         new_group->name = strdup(grp->gr_name);
-        new_group->password = strdup(grp->gr_passwd);
 
         int members_capacity = 10;
         new_group->members = malloc(members_capacity * sizeof(char *));
