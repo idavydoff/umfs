@@ -5,8 +5,10 @@
 
 #include "common.h"
 
-void free_user(struct User *user) {
-    if (user) {
+void free_user(struct User *user)
+{
+    if (user)
+    {
         free(user->name);
         user->name = NULL;
         free(user->shell);
@@ -18,26 +20,33 @@ void free_user(struct User *user) {
     }
 }
 
-void get_users() {
-    int capacity = state.users_count != 0 ? state.users_count : 20;
-    if (state.users) {
-        capacity = state.users_count;
-        for (int i = 0; i < state.users_count; i++) {
-            free_user(state.users[i]);
+void get_users()
+{
+    if (state.users)
+    {
+        GList *keys = g_hash_table_get_keys(state.users);
+        GList *keys_ptr = keys;
+
+        while (keys_ptr)
+        {
+            User *user = g_hash_table_lookup(state.users, keys_ptr->data);
+            free_user(user);
+            free(keys_ptr->data);
+            keys_ptr = keys_ptr->next;
         }
-        free(state.users);
+
+        g_list_free(keys);
+
+        g_hash_table_steal_all(state.users);
+    }
+    else
+    {
+        state.users = g_hash_table_new(g_str_hash, g_str_equal);
     }
 
-    state.users = malloc(capacity * sizeof(struct User*));
-    state.users_count = 0;
-
     struct passwd *p;
-    while((p = getpwent()) != NULL) {
-        if (state.users_count >= capacity) {
-            capacity += 20;
-            state.users = realloc(state.users, capacity * sizeof(struct User*));
-        }
-
+    while ((p = getpwent()) != NULL)
+    {
         struct User *new_user = malloc(sizeof(struct User));
 
         new_user->name = strdup(p->pw_name);
@@ -45,8 +54,7 @@ void get_users() {
         new_user->dir = strdup(p->pw_dir);
         new_user->shell = strdup(p->pw_shell);
 
-        state.users[state.users_count] = new_user;
-        state.users_count += 1;
+        g_hash_table_insert(state.users, strdup(p->pw_name), new_user);
     }
     endpwent();
 }

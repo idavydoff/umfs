@@ -1,4 +1,4 @@
-#ifndef USERS   /* Include guard */
+#ifndef USERS /* Include guard */
 #define USERS
 
 void free_user(struct User *user);
