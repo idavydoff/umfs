@@ -72,6 +72,14 @@ void get_groups()
             }
             new_group->members[new_group->members_count] = strdup(grp->gr_mem[new_group->members_count]);
 
+            User *user = g_hash_table_lookup(state.users, grp->gr_mem[new_group->members_count]);
+            if ((user->groups_count + 1) % 5 == 1)
+            {
+                user->groups = realloc(user->groups, (user->groups_count + 5) * sizeof(char *));
+            }
+            user->groups[user->groups_count] = strdup(grp->gr_name);
+            user->groups_count++;
+
             grp->gr_mem++;
             new_group->members_count++;
         }

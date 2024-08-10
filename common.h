@@ -10,9 +10,12 @@
 typedef struct User
 {
     char *name;
+    char *gecos;
     uid_t uid;
     char *shell;
     char *dir;
+    char **groups;
+    int groups_count;
 } User;
 
 typedef struct Group
@@ -32,7 +35,6 @@ typedef struct State
 extern struct State state;
 extern pthread_mutex_t state_data_mutex;
 
-int get_dynamic_string_size(char *str);
 bool startsWith(const char *a, const char *b);
 int string_ends_with(const char *str, const char *suffix);
 char *get_item_name_from_path(const char *path, char *offset);

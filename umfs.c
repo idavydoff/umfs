@@ -48,26 +48,50 @@ static void *umfs_init(struct fuse_conn_info *conn,
 static int umfs_readlink(const char *path, char *buf, size_t buf_size)
 {
     char newpath[buf_size];
-
     char *path_dup = strdup(path);
-    char *member_name = path_dup + strlen("/groups/");
-    bool loop = true;
-    while (loop)
-    {
-        if (startsWith(member_name, "/members"))
-        {
-            member_name += strlen("/members/");
-            loop = false;
-            break;
-        }
-        member_name++;
-    }
 
-    // TODO: урезать новый путь, если он не влезает в newpath[buf_size].
-    // (Как урезать чтобы симлинк продолжал резолвиться в правильный путь? Хуй его знает)
-    sprintf(newpath, "%s/users/%s", ABSOLUTE_MOUNT_PATH, member_name);
-    free(path_dup);
-    memcpy(buf, newpath, strlen(newpath));
+    if (startsWith(path, "/users/"))
+    {
+        char *group_name = path_dup + strlen("/users/");
+        bool loop = true;
+        while (loop)
+        {
+            if (startsWith(group_name, "/groups"))
+            {
+                group_name += strlen("/groups/");
+                loop = false;
+                break;
+            }
+            group_name++;
+        }
+
+        // TODO: урезать новый путь, если он не влезает в newpath[buf_size].
+        // (Как урезать чтобы симлинк продолжал резолвиться в правильный путь? Хуй его знает)
+        sprintf(newpath, "%s/groups/%s", ABSOLUTE_MOUNT_PATH, group_name);
+        free(path_dup);
+        memcpy(buf, newpath, strlen(newpath));
+    }
+    if (startsWith(path, "/groups/"))
+    {
+        char *member_name = path_dup + strlen("/groups/");
+        bool loop = true;
+        while (loop)
+        {
+            if (startsWith(member_name, "/members"))
+            {
+                member_name += strlen("/members/");
+                loop = false;
+                break;
+            }
+            member_name++;
+        }
+
+        // TODO: урезать новый путь, если он не влезает в newpath[buf_size].
+        // (Как урезать чтобы симлинк продолжал резолвиться в правильный путь? Хуй его знает)
+        sprintf(newpath, "%s/users/%s", ABSOLUTE_MOUNT_PATH, member_name);
+        free(path_dup);
+        memcpy(buf, newpath, strlen(newpath));
+    }
 
     return 0;
 }
@@ -118,8 +142,30 @@ static int umfs_getattr(const char *path, struct stat *stbuf,
 
             strcat(name, "/");
 
+            char groups_dir_name[NAME_MAX + strlen("/groups")];
+            strcpy(groups_dir_name, user->name);
+            strcat(groups_dir_name, "/groups");
+
             if (startsWith(path + strlen("/users/"), name))
             {
+                if (strcmp(path + strlen("/users/"), groups_dir_name) == 0)
+                {
+                    stbuf->st_mode = S_IFDIR | 0755;
+                    stbuf->st_nlink = 2;
+
+                    pthread_mutex_unlock(&state_data_mutex);
+                    return 0;
+                }
+
+                if (startsWith(path + strlen("/users/"), groups_dir_name))
+                {
+                    stbuf->st_mode = S_IFLNK | 0666;
+                    stbuf->st_nlink = 1;
+
+                    pthread_mutex_unlock(&state_data_mutex);
+                    return 0;
+                }
+
                 stbuf->st_mode = S_IFREG | 0666;
                 stbuf->st_nlink = 1;
 
@@ -127,17 +173,22 @@ static int umfs_getattr(const char *path, struct stat *stbuf,
                 if (string_ends_with(path, "/uid") != 0)
                 {
                     snprintf(buffer, sizeof(buffer), "%d\n", user->uid);
-                    stbuf->st_size = get_dynamic_string_size(buffer);
+                    stbuf->st_size = strlen(buffer);
                 }
                 if (string_ends_with(path, "/shell") != 0)
                 {
                     snprintf(buffer, sizeof(buffer), "%s\n", user->shell);
-                    stbuf->st_size = get_dynamic_string_size(buffer);
+                    stbuf->st_size = strlen(buffer);
                 }
                 if (string_ends_with(path, "/dir") != 0)
                 {
                     snprintf(buffer, sizeof(buffer), "%s\n", user->dir);
-                    stbuf->st_size = get_dynamic_string_size(buffer);
+                    stbuf->st_size = strlen(buffer);
+                }
+                if (string_ends_with(path, "/full_name") != 0)
+                {
+                    snprintf(buffer, sizeof(buffer), "%s\n", user->gecos);
+                    stbuf->st_size = strlen(buffer);
                 }
 
                 pthread_mutex_unlock(&state_data_mutex);
@@ -224,8 +275,8 @@ static int umfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     printf("Read dir: %s\n", path);
 
     pthread_mutex_lock(&state_data_mutex);
-    get_groups();
     get_users();
+    get_groups();
     pthread_mutex_unlock(&state_data_mutex);
 
     filler(buf, ".", NULL, 0, 0);
@@ -233,9 +284,32 @@ static int umfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 
     if (startsWith(path, "/users/"))
     {
+        if (string_ends_with(path, "/groups") != 0)
+        {
+            char *name = get_item_name_from_path(path, "/users/");
+            struct User *user = g_hash_table_lookup(state.users, name);
+
+            if (user == NULL)
+            {
+                pthread_mutex_unlock(&state_data_mutex);
+
+                return -ENOENT;
+            }
+
+            for (int k = 0; k < user->groups_count; k++)
+            {
+                filler(buf, user->groups[k], NULL, 0, 0);
+            }
+
+            pthread_mutex_unlock(&state_data_mutex);
+            return 0;
+        }
+
         filler(buf, "uid", NULL, 0, 0);
         filler(buf, "shell", NULL, 0, 0);
         filler(buf, "dir", NULL, 0, 0);
+        filler(buf, "groups", NULL, 0, 0);
+        filler(buf, "full_name", NULL, 0, 0);
 
         return 0;
     }
@@ -314,8 +388,6 @@ static int umfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 static int umfs_open(const char *path, struct fuse_file_info *fi)
 {
     printf("Open: %s\n", path);
-    // if (strcmp(path+1, options.filename) != 0)
-    //  return -ENOENT;
     if ((fi->flags & O_ACCMODE) != O_RDONLY)
         return -EACCES;
 
@@ -357,6 +429,10 @@ static int umfs_read(const char *path, char *buf, size_t size, off_t offset,
         if (string_ends_with(path, "uid") != 0)
         {
             snprintf(buffer, sizeof(buffer), "%d\n", user->uid);
+        }
+        if (string_ends_with(path, "full_name") != 0)
+        {
+            snprintf(buffer, sizeof(buffer), "%s\n", user->gecos);
         }
         len = strlen(buffer);
         if (offset < len)
@@ -426,8 +502,8 @@ int main(int argc, char *argv[])
 {
     pthread_mutex_init(&state_data_mutex, NULL);
 
-    get_groups();
     get_users();
+    get_groups();
 
     int ret;
     struct fuse_args args = FUSE_ARGS_INIT(argc, argv);

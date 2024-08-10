@@ -1,5 +1,5 @@
 test-fs
-_test.c
+_test*
 umfs
 .devcontainer
 .github

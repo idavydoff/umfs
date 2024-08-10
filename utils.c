@@ -2,19 +2,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-int get_dynamic_string_size(char *str)
-{
-    int res = 0;
-
-    while (*str)
-    {
-        res += sizeof(char);
-        str++;
-    }
-
-    return res;
-}
-
 bool startsWith(const char *a, const char *b)
 {
     if (strncmp(a, b, strlen(b)) == 0)

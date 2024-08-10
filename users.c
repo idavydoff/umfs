@@ -2,6 +2,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "common.h"
 
@@ -11,10 +12,21 @@ void free_user(struct User *user)
     {
         free(user->name);
         user->name = NULL;
+        free(user->gecos);
+        user->gecos = NULL;
         free(user->shell);
         user->shell = NULL;
         free(user->dir);
         user->dir = NULL;
+
+        for (int i = 0; i < user->groups_count; i++)
+        {
+            free(user->groups[i]);
+            user->groups[i] = NULL;
+        }
+        free(user->groups);
+        user->groups = NULL;
+
         free(user);
         user = NULL;
     }
@@ -50,9 +62,14 @@ void get_users()
         struct User *new_user = malloc(sizeof(struct User));
 
         new_user->name = strdup(p->pw_name);
+        new_user->gecos = strdup(p->pw_gecos);
         new_user->uid = p->pw_uid;
         new_user->dir = strdup(p->pw_dir);
         new_user->shell = strdup(p->pw_shell);
+
+        new_user->groups = malloc(5 * sizeof(char *));
+        new_user->groups[0] = strdup(p->pw_name);
+        new_user->groups_count = 1;
 
         g_hash_table_insert(state.users, strdup(p->pw_name), new_user);
     }
