@@ -34,6 +34,7 @@ typedef struct State
 
 extern struct State state;
 extern pthread_mutex_t state_data_mutex;
+extern char ABSOLUTE_MOUNT_PATH[PATH_MAX];
 
 bool startsWith(const char *a, const char *b);
 int string_ends_with(const char *str, const char *suffix);
