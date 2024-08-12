@@ -39,5 +39,6 @@ extern char ABSOLUTE_MOUNT_PATH[PATH_MAX];
 bool startsWith(const char *a, const char *b);
 int string_ends_with(const char *str, const char *suffix);
 char *get_item_name_from_path(const char *path, char *offset);
+char *get_path_end(const char *path);
 
 #endif

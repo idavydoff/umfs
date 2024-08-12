@@ -45,3 +45,30 @@ get_item_name_from_path(const char *path, char *offset)
 
     return result;
 }
+
+char *get_path_end(const char *path)
+{
+    char *path_dup = strdup(path);
+
+    static char *res = NULL;
+    res = malloc(sizeof(path) * sizeof(char));
+
+    int last_slash_index = 0;
+
+    for (int i = 0; i < strlen(path_dup); i++)
+    {
+        if (path_dup[i] == '/')
+        {
+            last_slash_index = i;
+        }
+    }
+
+    char *end = path_dup + last_slash_index + 1;
+
+    res = realloc(res, (strlen(end) * sizeof(char)) + 1);
+    strcpy(res, end);
+
+    free(path_dup);
+
+    return res;
+}

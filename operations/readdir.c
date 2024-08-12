@@ -53,6 +53,7 @@ int umfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offs
         filler(buf, "dir", NULL, 0, 0);
         filler(buf, "groups", NULL, 0, 0);
         filler(buf, "full_name", NULL, 0, 0);
+        filler(buf, "name", NULL, 0, 0);
 
         return 0;
     }
@@ -99,6 +100,7 @@ int umfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offs
 
         filler(buf, "gid", NULL, 0, 0);
         filler(buf, "members", NULL, 0, 0);
+        filler(buf, "name", NULL, 0, 0);
 
         pthread_mutex_unlock(&state_data_mutex);
         return 0;

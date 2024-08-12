@@ -71,40 +71,58 @@ int umfs_getattr(const char *path, struct stat *stbuf, struct fuse_file_info *fi
 
                 if (startsWith(path + strlen("/users/"), groups_dir_name))
                 {
-                    stbuf->st_mode = S_IFLNK | 0666;
-                    stbuf->st_nlink = 1;
+                    char *group_name = get_path_end(path);
+                    bool file_valid = false;
+                    if (g_hash_table_contains(state.groups, group_name))
+                    {
+                        stbuf->st_mode = S_IFLNK | 0666;
+                        stbuf->st_nlink = 1;
+                        file_valid = true;
+                    }
+                    free(group_name);
 
                     pthread_mutex_unlock(&state_data_mutex);
-                    return 0;
+                    return file_valid ? 0 : -ENOENT;
                 }
 
-                stbuf->st_mode = S_IFREG | 0666;
-                stbuf->st_nlink = 1;
-
+                bool file_valid = false;
                 char buffer[100];
                 if (string_ends_with(path, "/uid") != 0)
                 {
                     snprintf(buffer, sizeof(buffer), "%d\n", user->uid);
                     stbuf->st_size = strlen(buffer);
+                    file_valid = true;
                 }
                 if (string_ends_with(path, "/shell") != 0)
                 {
                     snprintf(buffer, sizeof(buffer), "%s\n", user->shell);
                     stbuf->st_size = strlen(buffer);
+                    file_valid = true;
                 }
                 if (string_ends_with(path, "/dir") != 0)
                 {
                     snprintf(buffer, sizeof(buffer), "%s\n", user->dir);
                     stbuf->st_size = strlen(buffer);
+                    file_valid = true;
                 }
                 if (string_ends_with(path, "/full_name") != 0)
                 {
                     snprintf(buffer, sizeof(buffer), "%s\n", user->gecos);
                     stbuf->st_size = strlen(buffer);
+                    file_valid = true;
+                }
+                if (string_ends_with(path, "/name") != 0)
+                {
+                    snprintf(buffer, sizeof(buffer), "%s\n", user->name);
+                    stbuf->st_size = strlen(buffer);
+                    file_valid = true;
                 }
 
+                stbuf->st_mode = S_IFREG | 0666;
+                stbuf->st_nlink = 1;
+
                 pthread_mutex_unlock(&state_data_mutex);
-                return 0;
+                return file_valid ? 0 : -ENOENT;
             }
             else
             {
@@ -147,19 +165,40 @@ int umfs_getattr(const char *path, struct stat *stbuf, struct fuse_file_info *fi
 
                 if (startsWith(path + strlen("/groups/"), members_dir_name))
                 {
-                    stbuf->st_mode = S_IFLNK | 0666;
-                    stbuf->st_nlink = 1;
+                    char *user_name = get_path_end(path);
+                    bool file_valid = false;
+                    if (g_hash_table_contains(state.users, user_name))
+                    {
+                        stbuf->st_mode = S_IFLNK | 0666;
+                        stbuf->st_nlink = 1;
+                        file_valid = true;
+                    }
+                    free(user_name);
 
                     pthread_mutex_unlock(&state_data_mutex);
-                    return 0;
+                    return file_valid ? 0 : -ENOENT;
+                }
+
+                bool file_valid = false;
+                char buffer[100];
+                if (string_ends_with(path, "/gid") != 0)
+                {
+                    snprintf(buffer, sizeof(buffer), "%d\n", group->gid);
+                    stbuf->st_size = strlen(buffer);
+                    file_valid = true;
+                }
+                if (string_ends_with(path, "/name") != 0)
+                {
+                    snprintf(buffer, sizeof(buffer), "%s\n", group->name);
+                    stbuf->st_size = strlen(buffer);
+                    file_valid = true;
                 }
 
                 stbuf->st_mode = S_IFREG | 0666;
                 stbuf->st_nlink = 1;
-                stbuf->st_size = 100; // TODO убрать
 
                 pthread_mutex_unlock(&state_data_mutex);
-                return 0;
+                return file_valid ? 0 : -ENOENT;
             }
             else
             {

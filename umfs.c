@@ -2,21 +2,11 @@
 
 #include <fuse.h>
 #include <glib.h>
-
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <stddef.h>
 #include <assert.h>
 #include <limits.h> /* PATH_MAX */
-
 #include <grp.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <pwd.h>
 #include <pthread.h>
 
 #include "common.h"

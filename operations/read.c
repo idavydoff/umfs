@@ -47,6 +47,10 @@ int umfs_read(const char *path, char *buf, size_t size, off_t offset,
         {
             snprintf(buffer, sizeof(buffer), "%s\n", user->gecos);
         }
+        if (string_ends_with(path, "name") != 0)
+        {
+            snprintf(buffer, sizeof(buffer), "%s\n", user->name);
+        }
         len = strlen(buffer);
         if (offset < len)
         {
@@ -75,6 +79,10 @@ int umfs_read(const char *path, char *buf, size_t size, off_t offset,
         if (string_ends_with(path, "gid") != 0)
         {
             snprintf(buffer, sizeof(buffer), "%d\n", group->gid);
+        }
+        if (string_ends_with(path, "name") != 0)
+        {
+            snprintf(buffer, sizeof(buffer), "%s\n", group->name);
         }
         len = strlen(buffer);
         if (offset < len)
