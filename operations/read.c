@@ -31,23 +31,23 @@ int umfs_read(const char *path, char *buf, size_t size, off_t offset,
         }
 
         char buffer[200];
-        if (string_ends_with(path, "dir") != 0)
+        if (string_ends_with(path, "/dir") != 0)
         {
             snprintf(buffer, sizeof(buffer), "%s\n", user->dir);
         }
-        if (string_ends_with(path, "shell") != 0)
+        if (string_ends_with(path, "/shell") != 0)
         {
             snprintf(buffer, sizeof(buffer), "%s\n", user->shell);
         }
-        if (string_ends_with(path, "uid") != 0)
+        if (string_ends_with(path, "/uid") != 0)
         {
             snprintf(buffer, sizeof(buffer), "%d\n", user->uid);
         }
-        if (string_ends_with(path, "full_name") != 0)
+        if (string_ends_with(path, "/full_name") != 0)
         {
             snprintf(buffer, sizeof(buffer), "%s\n", user->gecos);
         }
-        if (string_ends_with(path, "name") != 0)
+        if (string_ends_with(path, "/name") != 0)
         {
             snprintf(buffer, sizeof(buffer), "%s\n", user->name);
         }
