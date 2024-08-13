@@ -13,6 +13,7 @@ SRC += ./operations/open.c
 SRC += ./operations/opendir.c
 SRC += ./operations/getattr.c
 SRC += ./operations/init.c 
+SRC += ./operations/mkdir.c 
 
 umfs: $(SRC)
 	$(CC) $(CFLAGS) $(SRC) -o $@

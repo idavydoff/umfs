@@ -97,3 +97,58 @@ void get_groups()
     }
     endgrent();
 }
+
+uid_t get_avalable_gid()
+{
+    uid_t uid = 1000;
+
+    GList *keys = g_hash_table_get_keys(state.groups);
+    GList *keys_ptr = keys;
+
+    // Используется как HashSet
+    GHashTable *gids = g_hash_table_new(g_str_hash, g_str_equal);
+
+    while (keys_ptr)
+    {
+        User *user = g_hash_table_lookup(state.groups, keys_ptr->data);
+
+        char uid_string[6];
+        sprintf(uid_string, "%d", user->uid);
+
+        g_hash_table_insert(gids, strdup(uid_string), NULL);
+
+        keys_ptr = keys_ptr->next;
+    }
+
+    g_list_free(keys);
+
+    bool found = true;
+
+    while (found)
+    {
+        char uid_string[6];
+        sprintf(uid_string, "%d", uid);
+
+        if (g_hash_table_contains(gids, uid_string))
+        {
+            uid++;
+        }
+        else
+        {
+            found = false;
+        }
+    }
+
+    // Free gids
+    keys = g_hash_table_get_keys(gids);
+    keys_ptr = keys;
+    while (keys_ptr)
+    {
+        free(keys_ptr->data);
+        keys_ptr = keys_ptr->next;
+    }
+    g_list_free(keys);
+    g_hash_table_destroy(gids);
+
+    return uid;
+}

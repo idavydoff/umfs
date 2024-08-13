@@ -97,7 +97,6 @@ int umfs_getattr(const char *path, struct stat *stbuf, struct fuse_file_info *fi
 
             bool file_valid = false;
             char buffer[100];
-            printf("buffer len: %d\n", strlen(buffer));
             // /users/<name>/uid
             if (string_ends_with(path, "/uid") != 0)
             {
