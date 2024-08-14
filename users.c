@@ -78,4 +78,7 @@ uid_t get_user_uid(char *name)
     return user->uid;
 }
 
-uid_t get_avalable_uid() { return get_avalable_id(&get_users_keys, &get_user_uid); }
+uid_t get_avalable_uid()
+{
+    return get_avalable_id(&get_users_keys, &get_user_uid);
+}

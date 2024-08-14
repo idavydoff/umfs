@@ -8,8 +8,8 @@
 #include "../groups.h"
 #include "../users.h"
 
-int umfs_read(
-    const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
+int umfs_read(const char *path, char *buf, size_t size, off_t offset,
+    struct fuse_file_info *fi)
 {
     printf("Read: %s\n", path);
     size_t len;

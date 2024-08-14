@@ -9,7 +9,8 @@
 #include "../groups.h"
 #include "../users.h"
 
-int umfs_getattr(const char *path, struct stat *stbuf, struct fuse_file_info *fi)
+int umfs_getattr(
+    const char *path, struct stat *stbuf, struct fuse_file_info *fi)
 {
     (void)fi;
     printf("Get attr: %s\n", path);

@@ -66,16 +66,16 @@ void get_groups()
         while (*grp->gr_mem) {
             if (new_group->members_count >= members_capacity) {
                 members_capacity += 10;
-                new_group->members
-                    = realloc(new_group->members, members_capacity * sizeof(char *));
+                new_group->members = realloc(
+                    new_group->members, members_capacity * sizeof(char *));
             }
 
             new_group->members[new_group->members_count] = strdup(*grp->gr_mem);
 
             User *user = g_hash_table_lookup(state.users, *grp->gr_mem);
             if ((user->groups_count + 1) % 5 == 1) {
-                user->groups
-                    = realloc(user->groups, (user->groups_count + 5) * sizeof(char *));
+                user->groups = realloc(
+                    user->groups, (user->groups_count + 5) * sizeof(char *));
             }
             user->groups[user->groups_count] = strdup(grp->gr_name);
             user->groups_count++;
@@ -98,4 +98,7 @@ uid_t get_group_uid(char *name)
     return group->gid;
 }
 
-uid_t get_avalable_gid() { return get_avalable_id(&get_groups_keys, &get_group_uid); }
+uid_t get_avalable_gid()
+{
+    return get_avalable_id(&get_groups_keys, &get_group_uid);
+}

@@ -18,7 +18,8 @@ int string_ends_with(const char *str, const char *suffix)
     int str_len = strlen(str);
     int suffix_len = strlen(suffix);
 
-    return (str_len >= suffix_len) && (0 == strcmp(str + (str_len - suffix_len), suffix));
+    return (str_len >= suffix_len)
+        && (0 == strcmp(str + (str_len - suffix_len), suffix));
 }
 
 char *get_item_name_from_path(const char *path, char *offset)
@@ -71,7 +72,8 @@ char *get_path_end(const char *path)
     return res;
 }
 
-uid_t get_avalable_id(GList *(*get_keys)(), uid_t (*get_instance_id_by_name)(char *name))
+uid_t get_avalable_id(
+    GList *(*get_keys)(), uid_t (*get_instance_id_by_name)(char *name))
 {
     uid_t result_id = 1000;
 

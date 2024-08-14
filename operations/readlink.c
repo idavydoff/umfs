@@ -14,8 +14,8 @@ int umfs_readlink(const char *path, char *buf, size_t buf_size)
         char *group_name = get_path_end(path);
 
         // TODO: урезать новый путь, если он не влезает в newpath[buf_size].
-        // (Как урезать чтобы симлинк продолжал резолвиться в правильный путь? Хуй его
-        // знает)
+        // (Как урезать чтобы симлинк продолжал резолвиться в правильный путь?
+        // Хуй его знает)
         sprintf(newpath, "%s/groups/%s\0", ABSOLUTE_MOUNT_PATH, group_name);
         free(group_name);
         memcpy(buf, newpath, strlen(newpath) + 1);
@@ -24,8 +24,8 @@ int umfs_readlink(const char *path, char *buf, size_t buf_size)
         char *member_name = get_path_end(path);
 
         // TODO: урезать новый путь, если он не влезает в newpath[buf_size].
-        // (Как урезать чтобы симлинк продолжал резолвиться в правильный путь? Хуй его
-        // знает)
+        // (Как урезать чтобы симлинк продолжал резолвиться в правильный путь?
+        // Хуй его знает)
         sprintf(newpath, "%s/users/%s\0", ABSOLUTE_MOUNT_PATH, member_name);
         free(member_name);
         memcpy(buf, newpath, strlen(newpath) + 1);
