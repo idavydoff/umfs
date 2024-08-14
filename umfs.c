@@ -1,32 +1,29 @@
 #define FUSE_USE_VERSION 31
 
+#include <assert.h>
 #include <fuse.h>
 #include <glib.h>
+#include <grp.h>
+#include <limits.h> /* PATH_MAX */
+#include <pthread.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
-#include <limits.h> /* PATH_MAX */
-#include <grp.h>
-#include <pthread.h>
 
-#include "common.h"
-#include "users.h"
-#include "groups.h"
 #include "./operations/operations.h"
+#include "common.h"
+#include "groups.h"
+#include "users.h"
 
-struct State state = {NULL, NULL};
+struct State state = { NULL, NULL };
 char ABSOLUTE_MOUNT_PATH[PATH_MAX];
 pthread_mutex_t state_data_mutex;
 
-static struct options
-{
+static struct options {
     int show_help;
 } options;
 
-static const struct fuse_opt option_spec[] = {
-    OPTION("-h", show_help),
-    OPTION("--help", show_help),
-    FUSE_OPT_END};
+static const struct fuse_opt option_spec[]
+    = { OPTION("-h", show_help), OPTION("--help", show_help), FUSE_OPT_END };
 
 static const struct fuse_operations umfs_oper = {
     .init = umfs_init,
@@ -56,8 +53,7 @@ int main(int argc, char *argv[])
     if (fuse_opt_parse(&args, &options, option_spec, NULL) == -1)
         return 1;
 
-    if (options.show_help)
-    {
+    if (options.show_help) {
         show_help(argv[0]);
         assert(fuse_opt_add_arg(&args, "--help") == 0);
         args.argv[0][0] = '\0';

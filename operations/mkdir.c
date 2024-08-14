@@ -1,33 +1,27 @@
 #define FUSE_USE_VERSION 31
 
 #include <fuse.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <limits.h> /* PATH_MAX */
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "../common.h"
-#include "../users.h"
 #include "../groups.h"
+#include "../users.h"
 
 int umfs_mkdir(const char *path, mode_t mode)
 {
-    printf("Creating dir: %s\n", path);
-
     bool created = false;
-
     char *str_dup = strdup(path);
-    if (startsWith(path, "/users/"))
-    {
-        if (strchr(path + strlen("/users/"), '/'))
-        {
+
+    if (startsWith(path, "/users/")) {
+        if (strchr(path + strlen("/users/"), '/')) {
             return -EADDRNOTAVAIL;
         }
         char *name = str_dup + strlen("/users/");
-        printf("Creating user: %s\n", name);
 
-        if (g_hash_table_contains(state.users, name))
-        {
+        if (g_hash_table_contains(state.users, name)) {
             return -EADDRINUSE;
         }
 
@@ -37,30 +31,25 @@ int umfs_mkdir(const char *path, mode_t mode)
         fprintf(fp, "%s:x:%d:%d::/home/%s:/bin/bash\n", name, uid, uid, name);
         fclose(fp);
 
-        struct stat st = {0};
+        struct stat st = { 0 };
 
         char home_path[PATH_MAX];
         sprintf(home_path, "/home/%s", name);
 
-        if (stat(home_path, &st) == -1)
-        {
+        if (stat(home_path, &st) == -1) {
             mkdir(home_path, 0700);
         }
 
         created = true;
     }
 
-    if (startsWith(path, "/groups/"))
-    {
-        if (strchr(path + strlen("/groups/"), '/'))
-        {
+    if (startsWith(path, "/groups/")) {
+        if (strchr(path + strlen("/groups/"), '/')) {
             return -EADDRNOTAVAIL;
         }
         char *name = str_dup + strlen("/groups/");
-        printf("Creating group: %s\n", name);
 
-        if (g_hash_table_contains(state.groups, name))
-        {
+        if (g_hash_table_contains(state.groups, name)) {
             return -EADDRINUSE;
         }
 
@@ -75,8 +64,7 @@ int umfs_mkdir(const char *path, mode_t mode)
 
     free(str_dup);
 
-    if (created)
-    {
+    if (created) {
         pthread_mutex_lock(&state_data_mutex);
         get_users();
         get_groups();

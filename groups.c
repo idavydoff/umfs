@@ -1,21 +1,19 @@
+#include <glib.h>
 #include <grp.h>
-#include <sys/types.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <glib.h>
-#include <stdio.h>
+#include <sys/types.h>
 
 #include "common.h"
 
 void free_group(struct Group *group)
 {
-    if (group)
-    {
+    if (group) {
         free(group->name);
         group->name = NULL;
 
-        for (int i = 0; i < group->members_count; i++)
-        {
+        for (int i = 0; i < group->members_count; i++) {
             free(group->members[i]);
             group->members[i] = NULL;
         }
@@ -29,14 +27,12 @@ void free_group(struct Group *group)
 
 void get_groups()
 {
-    if (state.groups)
-    {
+    if (state.groups) {
 
         GList *keys = g_hash_table_get_keys(state.groups);
         GList *keys_ptr = keys;
 
-        while (keys_ptr)
-        {
+        while (keys_ptr) {
             Group *group = g_hash_table_lookup(state.groups, keys_ptr->data);
             free_group(group);
             free(keys_ptr->data);
@@ -45,15 +41,12 @@ void get_groups()
 
         g_list_free(keys);
         g_hash_table_steal_all(state.groups);
-    }
-    else
-    {
+    } else {
         state.groups = g_hash_table_new(g_str_hash, g_str_equal);
     }
 
     struct group *grp;
-    while ((grp = getgrent()) != NULL)
-    {
+    while ((grp = getgrent()) != NULL) {
 
         struct Group *new_group = malloc(sizeof(struct Group));
 
@@ -65,26 +58,24 @@ void get_groups()
         new_group->members_count = 0;
 
         User *user = g_hash_table_lookup(state.users, grp->gr_name);
-        if (user)
-        {
+        if (user) {
             new_group->members[0] = strdup(grp->gr_name);
             new_group->members_count++;
         }
 
-        while (*grp->gr_mem)
-        {
-            if (new_group->members_count >= members_capacity)
-            {
+        while (*grp->gr_mem) {
+            if (new_group->members_count >= members_capacity) {
                 members_capacity += 10;
-                new_group->members = realloc(new_group->members, members_capacity * sizeof(char *));
+                new_group->members
+                    = realloc(new_group->members, members_capacity * sizeof(char *));
             }
 
             new_group->members[new_group->members_count] = strdup(*grp->gr_mem);
 
             User *user = g_hash_table_lookup(state.users, *grp->gr_mem);
-            if ((user->groups_count + 1) % 5 == 1)
-            {
-                user->groups = realloc(user->groups, (user->groups_count + 5) * sizeof(char *));
+            if ((user->groups_count + 1) % 5 == 1) {
+                user->groups
+                    = realloc(user->groups, (user->groups_count + 5) * sizeof(char *));
             }
             user->groups[user->groups_count] = strdup(grp->gr_name);
             user->groups_count++;
@@ -98,57 +89,13 @@ void get_groups()
     endgrent();
 }
 
-uid_t get_avalable_gid()
+GList *get_groups_keys() { return g_hash_table_get_keys(state.groups); }
+
+uid_t get_group_uid(char *name)
 {
-    uid_t uid = 1000;
+    Group *group = g_hash_table_lookup(state.groups, name);
 
-    GList *keys = g_hash_table_get_keys(state.groups);
-    GList *keys_ptr = keys;
-
-    // Используется как HashSet
-    GHashTable *gids = g_hash_table_new(g_str_hash, g_str_equal);
-
-    while (keys_ptr)
-    {
-        User *user = g_hash_table_lookup(state.groups, keys_ptr->data);
-
-        char uid_string[6];
-        sprintf(uid_string, "%d", user->uid);
-
-        g_hash_table_insert(gids, strdup(uid_string), NULL);
-
-        keys_ptr = keys_ptr->next;
-    }
-
-    g_list_free(keys);
-
-    bool found = true;
-
-    while (found)
-    {
-        char uid_string[6];
-        sprintf(uid_string, "%d", uid);
-
-        if (g_hash_table_contains(gids, uid_string))
-        {
-            uid++;
-        }
-        else
-        {
-            found = false;
-        }
-    }
-
-    // Free gids
-    keys = g_hash_table_get_keys(gids);
-    keys_ptr = keys;
-    while (keys_ptr)
-    {
-        free(keys_ptr->data);
-        keys_ptr = keys_ptr->next;
-    }
-    g_list_free(keys);
-    g_hash_table_destroy(gids);
-
-    return uid;
+    return group->gid;
 }
+
+uid_t get_avalable_gid() { return get_avalable_id(&get_groups_keys, &get_group_uid); }
