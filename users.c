@@ -6,48 +6,59 @@
 
 #include "common.h"
 
-void free_user(struct User *user)
+void free_user(void *user)
 {
-    if (user) {
-        free(user->name);
-        user->name = NULL;
-        free(user->gecos);
-        user->gecos = NULL;
-        free(user->shell);
-        user->shell = NULL;
-        free(user->dir);
-        user->dir = NULL;
+    User *user_ptr = user;
+    if (user_ptr) {
+        free(user_ptr->name);
+        user_ptr->name = NULL;
+        free(user_ptr->gecos);
+        user_ptr->gecos = NULL;
+        free(user_ptr->shell);
+        user_ptr->shell = NULL;
+        free(user_ptr->dir);
+        user_ptr->dir = NULL;
 
-        for (int i = 0; i < user->groups_count; i++) {
-            free(user->groups[i]);
-            user->groups[i] = NULL;
+        for (int i = 0; i < user_ptr->groups_count; i++) {
+            free(user_ptr->groups[i]);
+            user_ptr->groups[i] = NULL;
         }
-        free(user->groups);
-        user->groups = NULL;
+        free(user_ptr->groups);
+        user_ptr->groups = NULL;
 
-        free(user);
-        user = NULL;
+        free(user_ptr);
+        user_ptr = NULL;
     }
+}
+
+User *copy_user(User *source_user)
+{
+    static User *new_user;
+    new_user = malloc(sizeof(struct User));
+
+    new_user->name = strdup(source_user->name);
+    new_user->gecos = strdup(source_user->gecos);
+    new_user->uid = source_user->uid;
+    new_user->gid = source_user->gid;
+    new_user->dir = strdup(source_user->dir);
+    new_user->shell = strdup(source_user->shell);
+
+    new_user->groups = malloc(source_user->groups_count * sizeof(char *));
+    for (int i = 0; i < source_user->groups_count; i++) {
+        new_user->groups[i] = strdup(source_user->groups[i]);
+    }
+    new_user->groups_count = source_user->groups_count;
+
+    return new_user;
 }
 
 void get_users()
 {
     if (state.users) {
-        GList *keys = g_hash_table_get_keys(state.users);
-        GList *keys_ptr = keys;
-
-        while (keys_ptr) {
-            User *user = g_hash_table_lookup(state.users, keys_ptr->data);
-            free_user(user);
-            free(keys_ptr->data);
-            keys_ptr = keys_ptr->next;
-        }
-
-        g_list_free(keys);
-
-        g_hash_table_steal_all(state.users);
+        g_hash_table_remove_all(state.users);
     } else {
-        state.users = g_hash_table_new(g_str_hash, g_str_equal);
+        state.users
+            = g_hash_table_new_full(g_str_hash, g_str_equal, &free, &free_user);
     }
 
     struct passwd *p;
@@ -57,12 +68,12 @@ void get_users()
         new_user->name = strdup(p->pw_name);
         new_user->gecos = strdup(p->pw_gecos);
         new_user->uid = p->pw_uid;
+        new_user->gid = p->pw_gid;
         new_user->dir = strdup(p->pw_dir);
         new_user->shell = strdup(p->pw_shell);
 
         new_user->groups = malloc(5 * sizeof(char *));
-        new_user->groups[0] = strdup(p->pw_name);
-        new_user->groups_count = 1;
+        new_user->groups_count = 0;
 
         g_hash_table_insert(state.users, strdup(p->pw_name), new_user);
     }

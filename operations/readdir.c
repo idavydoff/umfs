@@ -28,6 +28,7 @@ int umfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 
     if (startsWith(path, "/users/")) {
         if (string_ends_with(path, "/groups") != 0) {
+            pthread_mutex_lock(&state_data_mutex);
             char *name = get_item_name_from_path(path, "/users/");
             struct User *user = g_hash_table_lookup(state.users, name);
 
@@ -46,16 +47,17 @@ int umfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
         }
 
         filler(buf, "uid", NULL, 0, 0);
+        filler(buf, "gid", NULL, 0, 0);
         filler(buf, "shell", NULL, 0, 0);
         filler(buf, "dir", NULL, 0, 0);
         filler(buf, "groups", NULL, 0, 0);
         filler(buf, "full_name", NULL, 0, 0);
-        filler(buf, "name", NULL, 0, 0);
 
         return 0;
     }
-    pthread_mutex_lock(&state_data_mutex);
+
     if (strcmp(path, "/users") == 0) {
+        pthread_mutex_lock(&state_data_mutex);
         GList *users_list = g_hash_table_get_keys(state.users);
         GList *users_list_ptr = users_list;
 
@@ -72,6 +74,7 @@ int umfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 
     if (startsWith(path, "/groups/")) {
         if (string_ends_with(path, "/members") != 0) {
+            pthread_mutex_lock(&state_data_mutex);
             char *name = get_item_name_from_path(path, "/groups/");
             struct Group *group = g_hash_table_lookup(state.groups, name);
 
@@ -91,13 +94,13 @@ int umfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 
         filler(buf, "gid", NULL, 0, 0);
         filler(buf, "members", NULL, 0, 0);
-        filler(buf, "name", NULL, 0, 0);
 
         pthread_mutex_unlock(&state_data_mutex);
         return 0;
     }
 
     if (strcmp(path, "/groups") == 0) {
+        pthread_mutex_lock(&state_data_mutex);
         GList *groups_list = g_hash_table_get_keys(state.groups);
         GList *groups_list_ptr = groups_list;
 
@@ -114,6 +117,5 @@ int umfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     filler(buf, "users", NULL, 0, 0);
     filler(buf, "groups", NULL, 0, 0);
 
-    pthread_mutex_unlock(&state_data_mutex);
     return 0;
 }

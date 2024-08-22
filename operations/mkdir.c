@@ -10,28 +10,60 @@
 #include "../groups.h"
 #include "../users.h"
 
+uid_t create_dir(char *name)
+{
+    pthread_mutex_lock(&state_data_mutex);
+    if (g_hash_table_contains(state.groups, name)) {
+        pthread_mutex_unlock(&state_data_mutex);
+        return 0;
+    }
+    pthread_mutex_unlock(&state_data_mutex);
+
+    uid_t gid = get_avalable_gid();
+
+    FILE *fp = fopen("/etc/group", "a");
+    fprintf(fp, "%s:x:%d:\n", name, gid);
+    fclose(fp);
+
+    return gid;
+}
+
 int umfs_mkdir(const char *path, mode_t mode)
 {
+    printf("mkdir: %s\n", path);
+
     bool created = false;
-    char *str_dup = strdup(path);
+    char *path_dup = strdup(path);
 
     if (startsWith(path, "/users/")) {
         if (strchr(path + strlen("/users/"), '/')) {
             return -EADDRNOTAVAIL;
         }
-        char *name = str_dup + strlen("/users/");
+        char *name = path_dup + strlen("/users/");
 
+        pthread_mutex_lock(&state_data_mutex);
         if (g_hash_table_contains(state.users, name)) {
+            pthread_mutex_unlock(&state_data_mutex);
             return -EADDRINUSE;
         }
+        pthread_mutex_unlock(&state_data_mutex);
 
         uid_t uid = get_avalable_uid();
+        uid_t gid = create_dir(name);
+
+        short int group_suffix = 1;
+        while (gid == 0) {
+            char tmp[100];
+            sprintf(tmp, "%s%d", name, group_suffix);
+            gid = create_dir(tmp);
+            group_suffix++;
+        }
 
         FILE *fp = fopen("/etc/passwd", "a");
-        fprintf(fp, "%s:x:%d:%d::/home/%s:/bin/bash\n", name, uid, uid, name);
+        fprintf(fp, "%s:x:%d:%d::/home/%s:/bin/bash\n", name, uid, gid, name);
         fclose(fp);
 
-        struct stat st = { 0 };
+        struct stat st;
 
         char home_path[PATH_MAX];
         sprintf(home_path, "/home/%s", name);
@@ -47,22 +79,18 @@ int umfs_mkdir(const char *path, mode_t mode)
         if (strchr(path + strlen("/groups/"), '/')) {
             return -EADDRNOTAVAIL;
         }
-        char *name = str_dup + strlen("/groups/");
+        char *name = path_dup + strlen("/groups/");
 
-        if (g_hash_table_contains(state.groups, name)) {
+        uid_t gid = create_dir(name);
+
+        if (gid == 0) {
             return -EADDRINUSE;
         }
-
-        uid_t gid = get_avalable_gid();
-
-        FILE *fp = fopen("/etc/group", "a");
-        fprintf(fp, "%s:x:%d:\n", name, gid);
-        fclose(fp);
 
         created = true;
     }
 
-    free(str_dup);
+    free(path_dup);
 
     if (created) {
         pthread_mutex_lock(&state_data_mutex);

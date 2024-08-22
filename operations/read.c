@@ -2,7 +2,9 @@
 
 #include <fuse.h>
 #include <glib.h>
+#include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "../common.h"
 #include "../groups.h"
@@ -36,6 +38,9 @@ int umfs_read(const char *path, char *buf, size_t size, off_t offset,
         }
         if (string_ends_with(path, "/uid") != 0) {
             snprintf(buffer, sizeof(buffer), "%d\n", user->uid);
+        }
+        if (string_ends_with(path, "/gid") != 0) {
+            snprintf(buffer, sizeof(buffer), "%d\n", user->gid);
         }
         if (string_ends_with(path, "/full_name") != 0) {
             snprintf(buffer, sizeof(buffer), "%s\n", user->gecos);

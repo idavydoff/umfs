@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 
 bool startsWith(const char *a, const char *b)
@@ -120,4 +121,108 @@ uid_t get_avalable_id(
     g_hash_table_destroy(ids);
 
     return result_id;
+}
+
+void dynamic_strcat(char *str_a, char *str_b)
+{
+    int str_a_len = strlen(str_a);
+    int str_b_len = strlen(str_b);
+
+    for (int i = 0; i < str_b_len; i++) {
+        str_a[str_a_len + i] = str_b[i];
+        str_a[str_a_len + i + 1] = '\0';
+    }
+}
+
+int save_users_to_file()
+{
+    struct stat passwd_stat;
+    stat("/etc/passwd", &passwd_stat);
+
+    char *new_content = malloc(passwd_stat.st_size + 50);
+    *new_content = '\0';
+
+    GList *users_list = g_hash_table_get_values(state.users);
+    GList *users_list_ptr = users_list;
+
+    while (users_list_ptr) {
+        User *user = users_list_ptr->data;
+        char tmp[200];
+        sprintf(tmp, "%s:x:%d:%d::%s:%s\n", user->name, user->uid, user->gid,
+            user->dir, user->shell);
+        dynamic_strcat(new_content, tmp);
+        users_list_ptr = users_list_ptr->next;
+    }
+
+    g_list_free(users_list);
+
+    FILE *fp = fopen("/etc/passwd", "w");
+    if (fp == NULL) {
+        return -EIO;
+    }
+
+    fputs(new_content, fp);
+    fclose(fp);
+
+    free(new_content);
+
+    return 0;
+}
+
+int save_groups_to_file()
+{
+    struct stat group_stat;
+    stat("/etc/group", &group_stat);
+
+    char *new_content = malloc(group_stat.st_size + 50);
+    *new_content = '\0';
+
+    GList *groups_list = g_hash_table_get_values(state.groups);
+    GList *groups_list_ptr = groups_list;
+
+    while (groups_list_ptr) {
+        Group *group = groups_list_ptr->data;
+        char *tmp = malloc(200 * sizeof(char));
+        tmp[0] = '\0';
+        sprintf(tmp, "%s:x:%d:", group->name, group->gid);
+
+        for (int i = 0; i < group->members_count; i++) {
+            User *user = g_hash_table_lookup(state.users, group->members[i]);
+
+            if (user->gid == group->gid) {
+                continue;
+            }
+
+            char *tmp_member = malloc(50 * sizeof(char));
+            tmp_member[0] = '\0';
+            if (i > 0) {
+                tmp_member[0] = ',';
+                tmp_member[1] = '\0';
+            }
+            dynamic_strcat(tmp_member, group->members[i]);
+
+            dynamic_strcat(tmp, tmp_member);
+            free(tmp_member);
+        }
+
+        dynamic_strcat(tmp, "\n");
+
+        dynamic_strcat(new_content, tmp);
+        free(tmp);
+        groups_list_ptr = groups_list_ptr->next;
+    }
+
+    g_list_free(groups_list);
+
+    FILE *fp = fopen("/etc/group", "w");
+    if (fp == NULL) {
+        return -EIO;
+    }
+
+    fputs(new_content, fp);
+    fclose(fp);
+
+    free(new_content);
+
+    return 0;
 }
