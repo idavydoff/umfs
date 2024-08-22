@@ -89,6 +89,10 @@ int umfs_getattr(
             if (string_ends_with(path, "/uid") != 0) {
                 snprintf(buffer, sizeof(buffer), "%d\n", user->uid);
             }
+            // /users/<name>/gid
+            if (string_ends_with(path, "/gid") != 0) {
+                snprintf(buffer, sizeof(buffer), "%d\n", user->gid);
+            }
             // /users/<name>/shell
             if (string_ends_with(path, "/shell") != 0) {
                 snprintf(buffer, sizeof(buffer), "%s\n", user->shell);
@@ -101,13 +105,10 @@ int umfs_getattr(
             if (string_ends_with(path, "/full_name") != 0) {
                 snprintf(buffer, sizeof(buffer), "%s\n", user->gecos);
             }
-            // /users/<name>/name
-            if (string_ends_with(path, "/name") != 0) {
-                snprintf(buffer, sizeof(buffer), "%s\n", user->name);
-            }
             file_valid = string_ends_with(path, "/uid") != 0
                 || string_ends_with(path, "/shell") != 0
                 || string_ends_with(path, "/dir") != 0
+                || string_ends_with(path, "/gid") != 0
                 || string_ends_with(path, "/full_name") != 0
                 || string_ends_with(path, "/name") != 0;
 
@@ -159,6 +160,10 @@ int umfs_getattr(
                     stbuf->st_mode = S_IFLNK | 0666;
                     stbuf->st_nlink = 1;
                     file_valid = true;
+                } else {
+                    stbuf->st_mode = S_IFLNK | 0666;
+                    stbuf->st_nlink = 1;
+                    file_valid = true;
                 }
                 free(user_name);
 
@@ -171,10 +176,6 @@ int umfs_getattr(
             // /groups/<name>/gid
             if (string_ends_with(path, "/gid") != 0) {
                 snprintf(buffer, sizeof(buffer), "%d\n", group->gid);
-            }
-            // /groups/<name>/name
-            if (string_ends_with(path, "/name") != 0) {
-                snprintf(buffer, sizeof(buffer), "%s\n", group->name);
             }
 
             file_valid = string_ends_with(path, "/gid") != 0

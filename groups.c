@@ -7,8 +7,10 @@
 
 #include "common.h"
 
-void free_group(struct Group *group)
+void free_group(void *ptr)
 {
+    Group *group = ptr;
+
     if (group) {
         free(group->name);
         group->name = NULL;
@@ -25,24 +27,30 @@ void free_group(struct Group *group)
     }
 }
 
+Group *copy_group(Group *source_group)
+{
+    static Group *new_group;
+    new_group = malloc(sizeof(struct Group));
+
+    new_group->name = strdup(source_group->name);
+    new_group->gid = source_group->gid;
+
+    new_group->members = malloc(source_group->members_count * sizeof(char *));
+    for (int i = 0; i < source_group->members_count; i++) {
+        new_group->members[i] = strdup(source_group->members[i]);
+    }
+    new_group->members_count = source_group->members_count;
+
+    return new_group;
+}
+
 void get_groups()
 {
     if (state.groups) {
-
-        GList *keys = g_hash_table_get_keys(state.groups);
-        GList *keys_ptr = keys;
-
-        while (keys_ptr) {
-            Group *group = g_hash_table_lookup(state.groups, keys_ptr->data);
-            free_group(group);
-            free(keys_ptr->data);
-            keys_ptr = keys_ptr->next;
-        }
-
-        g_list_free(keys);
-        g_hash_table_steal_all(state.groups);
+        g_hash_table_remove_all(state.groups);
     } else {
-        state.groups = g_hash_table_new(g_str_hash, g_str_equal);
+        state.groups = g_hash_table_new_full(
+            g_str_hash, g_str_equal, &free, &free_group);
     }
 
     struct group *grp;
@@ -57,11 +65,27 @@ void get_groups()
         new_group->members = malloc(members_capacity * sizeof(char *));
         new_group->members_count = 0;
 
-        User *user = g_hash_table_lookup(state.users, grp->gr_name);
-        if (user) {
-            new_group->members[0] = strdup(grp->gr_name);
-            new_group->members_count++;
+        GList *users_keys = g_hash_table_get_keys(state.users);
+        GList *users_keys_ptr = users_keys;
+
+        while (users_keys_ptr) {
+            User *user = g_hash_table_lookup(state.users, users_keys_ptr->data);
+            if (user == NULL) {
+                users_keys_ptr = users_keys_ptr->next;
+                continue;
+            }
+
+            if (user->gid == grp->gr_gid) {
+                new_group->members[new_group->members_count]
+                    = strdup(users_keys_ptr->data);
+                new_group->members_count++;
+                user->groups[user->groups_count] = strdup(new_group->name);
+                user->groups_count++;
+            }
+            users_keys_ptr = users_keys_ptr->next;
         }
+
+        g_list_free(users_keys);
 
         while (*grp->gr_mem) {
             if (new_group->members_count >= members_capacity) {
@@ -73,6 +97,11 @@ void get_groups()
             new_group->members[new_group->members_count] = strdup(*grp->gr_mem);
 
             User *user = g_hash_table_lookup(state.users, *grp->gr_mem);
+            if (user == NULL) {
+                grp->gr_mem++;
+                new_group->members_count++;
+                continue;
+            }
             if ((user->groups_count + 1) % 5 == 1) {
                 user->groups = realloc(
                     user->groups, (user->groups_count + 5) * sizeof(char *));

@@ -1,0 +1,262 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-g",
+      "-fsanitize=address",
+      "-I/usr/local/include/fuse3",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-o",
+      "umfs",
+      "umfs.c"
+    ],
+    "directory": "/workspaces/umfs",
+    "file": "/workspaces/umfs/umfs.c",
+    "output": "/workspaces/umfs/umfs"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-g",
+      "-fsanitize=address",
+      "-I/usr/local/include/fuse3",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-o",
+      "umfs",
+      "utils.c"
+    ],
+    "directory": "/workspaces/umfs",
+    "file": "/workspaces/umfs/utils.c",
+    "output": "/workspaces/umfs/umfs"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-g",
+      "-fsanitize=address",
+      "-I/usr/local/include/fuse3",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-o",
+      "umfs",
+      "users.c"
+    ],
+    "directory": "/workspaces/umfs",
+    "file": "/workspaces/umfs/users.c",
+    "output": "/workspaces/umfs/umfs"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-g",
+      "-fsanitize=address",
+      "-I/usr/local/include/fuse3",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-o",
+      "umfs",
+      "groups.c"
+    ],
+    "directory": "/workspaces/umfs",
+    "file": "/workspaces/umfs/groups.c",
+    "output": "/workspaces/umfs/umfs"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-g",
+      "-fsanitize=address",
+      "-I/usr/local/include/fuse3",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-o",
+      "umfs",
+      "./operations/read.c"
+    ],
+    "directory": "/workspaces/umfs",
+    "file": "/workspaces/umfs/operations/read.c",
+    "output": "/workspaces/umfs/umfs"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-g",
+      "-fsanitize=address",
+      "-I/usr/local/include/fuse3",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-o",
+      "umfs",
+      "./operations/readlink.c"
+    ],
+    "directory": "/workspaces/umfs",
+    "file": "/workspaces/umfs/operations/readlink.c",
+    "output": "/workspaces/umfs/umfs"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-g",
+      "-fsanitize=address",
+      "-I/usr/local/include/fuse3",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-o",
+      "umfs",
+      "./operations/readdir.c"
+    ],
+    "directory": "/workspaces/umfs",
+    "file": "/workspaces/umfs/operations/readdir.c",
+    "output": "/workspaces/umfs/umfs"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-g",
+      "-fsanitize=address",
+      "-I/usr/local/include/fuse3",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-o",
+      "umfs",
+      "./operations/open.c"
+    ],
+    "directory": "/workspaces/umfs",
+    "file": "/workspaces/umfs/operations/open.c",
+    "output": "/workspaces/umfs/umfs"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-g",
+      "-fsanitize=address",
+      "-I/usr/local/include/fuse3",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-o",
+      "umfs",
+      "./operations/opendir.c"
+    ],
+    "directory": "/workspaces/umfs",
+    "file": "/workspaces/umfs/operations/opendir.c",
+    "output": "/workspaces/umfs/umfs"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-g",
+      "-fsanitize=address",
+      "-I/usr/local/include/fuse3",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-o",
+      "umfs",
+      "./operations/getattr.c"
+    ],
+    "directory": "/workspaces/umfs",
+    "file": "/workspaces/umfs/operations/getattr.c",
+    "output": "/workspaces/umfs/umfs"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-g",
+      "-fsanitize=address",
+      "-I/usr/local/include/fuse3",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-o",
+      "umfs",
+      "./operations/init.c"
+    ],
+    "directory": "/workspaces/umfs",
+    "file": "/workspaces/umfs/operations/init.c",
+    "output": "/workspaces/umfs/umfs"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-g",
+      "-fsanitize=address",
+      "-I/usr/local/include/fuse3",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-o",
+      "umfs",
+      "./operations/mkdir.c"
+    ],
+    "directory": "/workspaces/umfs",
+    "file": "/workspaces/umfs/operations/mkdir.c",
+    "output": "/workspaces/umfs/umfs"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-g",
+      "-fsanitize=address",
+      "-I/usr/local/include/fuse3",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-o",
+      "umfs",
+      "./operations/rename.c"
+    ],
+    "directory": "/workspaces/umfs",
+    "file": "/workspaces/umfs/operations/rename.c",
+    "output": "/workspaces/umfs/umfs"
+  }
+]

@@ -1,6 +1,7 @@
 test-fs
-_test*
+_*
 umfs
 .devcontainer
 .github
 .vscode
+.cache

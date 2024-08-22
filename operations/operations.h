@@ -1,4 +1,7 @@
+#define FUSE_USE_VERSION 31
+
 #include <stddef.h>
+#include <fuse.h>
 
 #ifndef OPERATIONS /* Include guard */
 #define OPERATIONS
@@ -14,5 +17,6 @@ int umfs_opendir(const char *path, struct fuse_file_info *fi);
 int umfs_getattr(
     const char *path, struct stat *stbuf, struct fuse_file_info *fi);
 int umfs_mkdir(const char *path, mode_t mode);
+int umfs_rename(const char *path, const char *new_path, unsigned int flags);
 
 #endif

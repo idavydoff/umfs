@@ -10,6 +10,7 @@ typedef struct User {
     char *name;
     char *gecos;
     uid_t uid;
+    uid_t gid;
     char *shell;
     char *dir;
     char **groups;
@@ -38,5 +39,8 @@ char *get_item_name_from_path(const char *path, char *offset);
 char *get_path_end(const char *path);
 uid_t get_avalable_id(
     GList *(*get_keys)(), uid_t (*get_instance_id_by_name)(char *name));
+void dynamic_strcat(char *str_a, char *str_b);
+int save_users_to_file();
+int save_groups_to_file();
 
 #endif

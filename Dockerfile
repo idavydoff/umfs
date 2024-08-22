@@ -2,8 +2,14 @@
 
 FROM davydoff/fedora-libfuse:v1-f40
 
-RUN dnf -y install git glib2-devel
+# for the umfs to run
+RUN dnf -y install glib2-devel
 
-COPY . /root/umfs
+# for neovim 
+RUN dnf -y install git clang-tools-extra bear htop
+
+RUN mkdir /root/.config
+
+# COPY ./nvim /root/.config/nvim
 
 WORKDIR /root/umfs
