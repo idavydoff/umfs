@@ -68,6 +68,9 @@ void get_groups()
         GList *users_keys = g_hash_table_get_keys(state.users);
         GList *users_keys_ptr = users_keys;
 
+        // Находим всех юзеров, у которых gid совпадает с gid'ом текущей группы,
+        // и добавляем их в список member'ов группы и добавляем саму группу
+        // в список групп пользователя.
         while (users_keys_ptr) {
             User *user = g_hash_table_lookup(state.users, users_keys_ptr->data);
             if (user == NULL) {
@@ -76,6 +79,12 @@ void get_groups()
             }
 
             if (user->gid == grp->gr_gid) {
+                if (new_group->members_count >= members_capacity) {
+                    members_capacity += 10;
+                    new_group->members = realloc(
+                        new_group->members, members_capacity * sizeof(char *));
+                }
+
                 new_group->members[new_group->members_count]
                     = strdup(users_keys_ptr->data);
                 new_group->members_count++;
