@@ -1,3 +1,4 @@
+#include <string.h>
 #define FUSE_USE_VERSION 31
 
 #include <fuse.h>
@@ -30,17 +31,20 @@ int umfs_read(const char *path, char *buf, size_t size, off_t offset,
         }
 
         char buffer[200];
-        if (string_ends_with(path, "/dir") != 0) {
+        if (string_ends_with(path, "/directory") != 0) {
             snprintf(buffer, sizeof(buffer), "%s\n", user->dir);
         }
         if (string_ends_with(path, "/shell") != 0) {
             snprintf(buffer, sizeof(buffer), "%s\n", user->shell);
         }
-        if (string_ends_with(path, "/uid") != 0) {
+        if (string_ends_with(path, "/id") != 0) {
             snprintf(buffer, sizeof(buffer), "%d\n", user->uid);
         }
-        if (string_ends_with(path, "/gid") != 0) {
-            snprintf(buffer, sizeof(buffer), "%d\n", user->gid);
+        if (string_ends_with(path, "/primary_group") != 0) {
+            char *primary_group_name = get_user_primary_group_name(user);
+            snprintf(buffer, sizeof(buffer), "%d (%s)\n", user->gid,
+                primary_group_name);
+            free(primary_group_name);
         }
         if (string_ends_with(path, "/full_name") != 0) {
             snprintf(buffer, sizeof(buffer), "%s\n", user->gecos);

@@ -47,10 +47,10 @@ int umfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
             return 0;
         }
 
-        filler(buf, "uid", NULL, 0, 0);
-        filler(buf, "gid", NULL, 0, 0);
+        filler(buf, "id", NULL, 0, 0);
+        filler(buf, "primary_group", NULL, 0, 0);
         filler(buf, "shell", NULL, 0, 0);
-        filler(buf, "dir", NULL, 0, 0);
+        filler(buf, "directory", NULL, 0, 0);
         filler(buf, "groups", NULL, 0, 0);
         filler(buf, "full_name", NULL, 0, 0);
 

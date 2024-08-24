@@ -97,30 +97,33 @@ int umfs_getattr(
 
             bool file_valid = false;
             char buffer[100];
-            // /users/<name>/uid
-            if (string_ends_with(path, "/uid") != 0) {
+            // /users/<name>/id
+            if (string_ends_with(path, "/id") != 0) {
                 snprintf(buffer, sizeof(buffer), "%d\n", user->uid);
             }
-            // /users/<name>/gid
-            if (string_ends_with(path, "/gid") != 0) {
-                snprintf(buffer, sizeof(buffer), "%d\n", user->gid);
+            // /users/<name>/primary_group
+            if (string_ends_with(path, "/primary_group") != 0) {
+                char *primary_group_name = get_user_primary_group_name(user);
+                snprintf(buffer, sizeof(buffer), "%d (%s)\n", user->gid,
+                    primary_group_name);
+                free(primary_group_name);
             }
             // /users/<name>/shell
             if (string_ends_with(path, "/shell") != 0) {
                 snprintf(buffer, sizeof(buffer), "%s\n", user->shell);
             }
-            // /users/<name>/dir
-            if (string_ends_with(path, "/dir") != 0) {
+            // /users/<name>/directory
+            if (string_ends_with(path, "/directory") != 0) {
                 snprintf(buffer, sizeof(buffer), "%s\n", user->dir);
             }
             // /users/<name>/full_name
             if (string_ends_with(path, "/full_name") != 0) {
                 snprintf(buffer, sizeof(buffer), "%s\n", user->gecos);
             }
-            file_valid = string_ends_with(path, "/uid") != 0
+            file_valid = string_ends_with(path, "/id") != 0
                 || string_ends_with(path, "/shell") != 0
-                || string_ends_with(path, "/dir") != 0
-                || string_ends_with(path, "/gid") != 0
+                || string_ends_with(path, "/directory") != 0
+                || string_ends_with(path, "/primary_group") != 0
                 || string_ends_with(path, "/full_name") != 0
                 || string_ends_with(path, "/name") != 0;
 

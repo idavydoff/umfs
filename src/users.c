@@ -94,3 +94,26 @@ uid_t get_avalable_uid()
 {
     return get_avalable_id(&get_users_keys, &get_user_uid);
 }
+
+char *get_user_primary_group_name(User *user)
+{
+    static char *primary_group_name = NULL;
+
+    GList *groups_values = g_hash_table_get_values(state.groups);
+    GList *groups_values_ptr = groups_values;
+
+    while (groups_values_ptr) {
+        Group *group = groups_values_ptr->data;
+
+        if (group->gid == user->gid) {
+            primary_group_name = strdup(group->name);
+            break;
+        }
+
+        groups_values_ptr = groups_values_ptr->next;
+    }
+
+    g_list_free(groups_values);
+
+    return primary_group_name;
+}
