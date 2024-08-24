@@ -25,7 +25,8 @@ static struct options {
 struct fuse_opt option_spec[]
     = { OPTION("-h", show_help), OPTION("--help", show_help), FUSE_OPT_END };
 
-static const struct fuse_operations umfs_oper = { .init = umfs_init,
+static const struct fuse_operations umfs_oper = {
+    .init = umfs_init,
     .getattr = umfs_getattr,
     .readdir = umfs_readdir,
     .open = umfs_open,
@@ -33,7 +34,9 @@ static const struct fuse_operations umfs_oper = { .init = umfs_init,
     .read = umfs_read,
     .readlink = umfs_readlink,
     .mkdir = umfs_mkdir,
-    .rename = umfs_rename };
+    .rename = umfs_rename,
+    .rmdir = umfs_rmdir,
+};
 
 static void show_help(const char *progname)
 {

@@ -15,6 +15,7 @@ SRC += ./operations/getattr.c
 SRC += ./operations/init.c 
 SRC += ./operations/mkdir.c 
 SRC += ./operations/rename.c 
+SRC += ./operations/rmdir.c 
 
 umfs: $(SRC)
 	$(CC) $(CFLAGS) $(SRC) -o $@

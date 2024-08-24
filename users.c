@@ -71,6 +71,7 @@ void get_users()
         new_user->gid = p->pw_gid;
         new_user->dir = strdup(p->pw_dir);
         new_user->shell = strdup(p->pw_shell);
+        new_user->sudo = false;
 
         new_user->groups = malloc(5 * sizeof(char *));
         new_user->groups_count = 0;

@@ -15,6 +15,7 @@ typedef struct User {
     char *dir;
     char **groups;
     int groups_count;
+    bool sudo;
 } User;
 
 typedef struct Group {
@@ -22,6 +23,7 @@ typedef struct Group {
     uid_t gid;
     char **members;
     int members_count;
+    bool primary_for_some_users;
 } Group;
 
 typedef struct State {
@@ -42,5 +44,7 @@ uid_t get_avalable_id(
 void dynamic_strcat(char *str_a, char *str_b);
 int save_users_to_file();
 int save_groups_to_file();
+short delete_from_dynamic_string_array(
+    char ***arr1, short arr_length, char *string);
 
 #endif

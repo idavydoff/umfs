@@ -60,11 +60,11 @@ int umfs_rename(const char *path, const char *new_path, unsigned int flags)
 
     if (startsWith(path, "/users/")) {
         if (strchr(path + strlen("/users/"), '/')) {
-            return -EADDRNOTAVAIL;
+            return -EINVAL;
         }
         if (!startsWith(new_path, "/users/")
             || strchr(new_path + strlen("/users/"), '/')) {
-            return -EADDRNOTAVAIL;
+            return -EINVAL;
         }
         char *old_name = path_dup + strlen("/users/");
         char *new_name = new_path_dup + strlen("/users/");
@@ -132,11 +132,11 @@ int umfs_rename(const char *path, const char *new_path, unsigned int flags)
 
     if (startsWith(path, "/groups/")) {
         if (strchr(path + strlen("/groups/"), '/')) {
-            return -EADDRNOTAVAIL;
+            return -EINVAL;
         }
         if (!startsWith(new_path, "/groups/")
             || strchr(new_path + strlen("/groups/"), '/')) {
-            return -EADDRNOTAVAIL;
+            return -EINVAL;
         }
 
         char *old_name = path_dup + strlen("/groups/");
@@ -183,5 +183,5 @@ int umfs_rename(const char *path, const char *new_path, unsigned int flags)
         return 0;
     }
 
-    return -EADDRNOTAVAIL;
+    return -EINVAL;
 }

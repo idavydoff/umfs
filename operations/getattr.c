@@ -46,7 +46,11 @@ int umfs_getattr(
 
             // /users/<name>
             if (strcmp(path + strlen("/users/"), name) == 0) {
-                stbuf->st_mode = S_IFDIR | 0755;
+                if (user->sudo) {
+                    stbuf->st_mode = S_IFDIR | 1755;
+                } else {
+                    stbuf->st_mode = S_IFDIR | 0755;
+                }
                 stbuf->st_nlink = 2;
 
                 pthread_mutex_unlock(&state_data_mutex);
@@ -72,7 +76,15 @@ int umfs_getattr(
             if (startsWith(path + strlen("/users/"), groups_dir_name)) {
                 char *group_name = get_path_end(path);
                 bool file_valid = false;
-                if (g_hash_table_contains(state.groups, group_name)) {
+
+                Group *group = g_hash_table_lookup(state.groups, group_name);
+
+                if (group) {
+                    if (group->gid == user->gid) {
+                        stbuf->st_size = 1;
+                    } else {
+                        stbuf->st_size = 0;
+                    }
                     stbuf->st_mode = S_IFLNK | 0666;
                     stbuf->st_nlink = 1;
                     file_valid = true;
@@ -132,7 +144,11 @@ int umfs_getattr(
 
             // /groups/<name>
             if (strcmp(path + strlen("/groups/"), name) == 0) {
-                stbuf->st_mode = S_IFDIR | 0755;
+                if (group->primary_for_some_users) {
+                    stbuf->st_mode = S_IFDIR | 1755;
+                } else {
+                    stbuf->st_mode = S_IFDIR | 0755;
+                }
                 stbuf->st_nlink = 2;
 
                 pthread_mutex_unlock(&state_data_mutex);
@@ -156,15 +172,20 @@ int umfs_getattr(
             if (startsWith(path + strlen("/groups/"), members_dir_name)) {
                 char *user_name = get_path_end(path);
                 bool file_valid = false;
-                if (g_hash_table_contains(state.users, user_name)) {
-                    stbuf->st_mode = S_IFLNK | 0666;
-                    stbuf->st_nlink = 1;
-                    file_valid = true;
-                } else {
+
+                User *user = g_hash_table_lookup(state.users, user_name);
+
+                if (user) {
+                    if (user->gid == group->gid) {
+                        stbuf->st_size = 1;
+                    } else {
+                        stbuf->st_size = 0;
+                    }
                     stbuf->st_mode = S_IFLNK | 0666;
                     stbuf->st_nlink = 1;
                     file_valid = true;
                 }
+
                 free(user_name);
 
                 pthread_mutex_unlock(&state_data_mutex);

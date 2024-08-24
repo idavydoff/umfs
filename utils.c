@@ -226,3 +226,30 @@ int save_groups_to_file()
 
     return 0;
 }
+
+short delete_from_dynamic_string_array(
+    char ***arr1, short arr_length, char *string)
+{
+    char **arr = *arr1;
+
+    char **tmp = malloc(arr_length * sizeof(char *));
+    short deleted_count = 0;
+    for (short i = 0; i < arr_length; i++) {
+        if (strcmp(arr[i], string) == 0) {
+            deleted_count++;
+            free(arr[i]);
+            continue;
+        }
+        tmp[i - deleted_count] = strdup(arr[i]);
+        free(arr[i]);
+    }
+
+    free(*arr1);
+
+    if (deleted_count)
+        tmp = realloc(tmp, (arr_length - deleted_count) * sizeof(char *));
+
+    *arr1 = tmp;
+
+    return deleted_count;
+}

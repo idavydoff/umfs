@@ -2,6 +2,7 @@
 
 #include <fuse.h>
 #include <glib.h>
+#include <string.h>
 
 #include <stdio.h>
 

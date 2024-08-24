@@ -90,6 +90,8 @@ void get_groups()
                 new_group->members_count++;
                 user->groups[user->groups_count] = strdup(new_group->name);
                 user->groups_count++;
+
+                new_group->primary_for_some_users = true;
             }
             users_keys_ptr = users_keys_ptr->next;
         }
@@ -117,6 +119,10 @@ void get_groups()
             }
             user->groups[user->groups_count] = strdup(grp->gr_name);
             user->groups_count++;
+
+            if (strcmp(new_group->name, "sudo") == 0) {
+                user->sudo = true;
+            }
 
             grp->gr_mem++;
             new_group->members_count++;
