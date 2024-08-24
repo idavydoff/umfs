@@ -13,10 +13,10 @@
       "-pthread",
       "-o",
       "umfs",
-      "umfs.c"
+      "./src/umfs.c"
     ],
     "directory": "/workspaces/umfs",
-    "file": "/workspaces/umfs/umfs.c",
+    "file": "/workspaces/umfs/src/umfs.c",
     "output": "/workspaces/umfs/umfs"
   },
   {
@@ -33,10 +33,10 @@
       "-pthread",
       "-o",
       "umfs",
-      "utils.c"
+      "./src/utils.c"
     ],
     "directory": "/workspaces/umfs",
-    "file": "/workspaces/umfs/utils.c",
+    "file": "/workspaces/umfs/src/utils.c",
     "output": "/workspaces/umfs/umfs"
   },
   {
@@ -53,10 +53,10 @@
       "-pthread",
       "-o",
       "umfs",
-      "users.c"
+      "./src/users.c"
     ],
     "directory": "/workspaces/umfs",
-    "file": "/workspaces/umfs/users.c",
+    "file": "/workspaces/umfs/src/users.c",
     "output": "/workspaces/umfs/umfs"
   },
   {
@@ -73,10 +73,10 @@
       "-pthread",
       "-o",
       "umfs",
-      "groups.c"
+      "./src/groups.c"
     ],
     "directory": "/workspaces/umfs",
-    "file": "/workspaces/umfs/groups.c",
+    "file": "/workspaces/umfs/src/groups.c",
     "output": "/workspaces/umfs/umfs"
   },
   {
@@ -93,10 +93,10 @@
       "-pthread",
       "-o",
       "umfs",
-      "./operations/read.c"
+      "./src/operations/read.c"
     ],
     "directory": "/workspaces/umfs",
-    "file": "/workspaces/umfs/operations/read.c",
+    "file": "/workspaces/umfs/src/operations/read.c",
     "output": "/workspaces/umfs/umfs"
   },
   {
@@ -113,10 +113,10 @@
       "-pthread",
       "-o",
       "umfs",
-      "./operations/readlink.c"
+      "./src/operations/readlink.c"
     ],
     "directory": "/workspaces/umfs",
-    "file": "/workspaces/umfs/operations/readlink.c",
+    "file": "/workspaces/umfs/src/operations/readlink.c",
     "output": "/workspaces/umfs/umfs"
   },
   {
@@ -133,10 +133,10 @@
       "-pthread",
       "-o",
       "umfs",
-      "./operations/readdir.c"
+      "./src/operations/readdir.c"
     ],
     "directory": "/workspaces/umfs",
-    "file": "/workspaces/umfs/operations/readdir.c",
+    "file": "/workspaces/umfs/src/operations/readdir.c",
     "output": "/workspaces/umfs/umfs"
   },
   {
@@ -153,10 +153,10 @@
       "-pthread",
       "-o",
       "umfs",
-      "./operations/open.c"
+      "./src/operations/open.c"
     ],
     "directory": "/workspaces/umfs",
-    "file": "/workspaces/umfs/operations/open.c",
+    "file": "/workspaces/umfs/src/operations/open.c",
     "output": "/workspaces/umfs/umfs"
   },
   {
@@ -173,10 +173,10 @@
       "-pthread",
       "-o",
       "umfs",
-      "./operations/opendir.c"
+      "./src/operations/opendir.c"
     ],
     "directory": "/workspaces/umfs",
-    "file": "/workspaces/umfs/operations/opendir.c",
+    "file": "/workspaces/umfs/src/operations/opendir.c",
     "output": "/workspaces/umfs/umfs"
   },
   {
@@ -193,10 +193,10 @@
       "-pthread",
       "-o",
       "umfs",
-      "./operations/getattr.c"
+      "./src/operations/getattr.c"
     ],
     "directory": "/workspaces/umfs",
-    "file": "/workspaces/umfs/operations/getattr.c",
+    "file": "/workspaces/umfs/src/operations/getattr.c",
     "output": "/workspaces/umfs/umfs"
   },
   {
@@ -213,10 +213,10 @@
       "-pthread",
       "-o",
       "umfs",
-      "./operations/init.c"
+      "./src/operations/init.c"
     ],
     "directory": "/workspaces/umfs",
-    "file": "/workspaces/umfs/operations/init.c",
+    "file": "/workspaces/umfs/src/operations/init.c",
     "output": "/workspaces/umfs/umfs"
   },
   {
@@ -233,10 +233,10 @@
       "-pthread",
       "-o",
       "umfs",
-      "./operations/mkdir.c"
+      "./src/operations/mkdir.c"
     ],
     "directory": "/workspaces/umfs",
-    "file": "/workspaces/umfs/operations/mkdir.c",
+    "file": "/workspaces/umfs/src/operations/mkdir.c",
     "output": "/workspaces/umfs/umfs"
   },
   {
@@ -253,10 +253,10 @@
       "-pthread",
       "-o",
       "umfs",
-      "./operations/rename.c"
+      "./src/operations/rename.c"
     ],
     "directory": "/workspaces/umfs",
-    "file": "/workspaces/umfs/operations/rename.c",
+    "file": "/workspaces/umfs/src/operations/rename.c",
     "output": "/workspaces/umfs/umfs"
   },
   {
@@ -273,10 +273,10 @@
       "-pthread",
       "-o",
       "umfs",
-      "./operations/rmdir.c"
+      "./src/operations/rmdir.c"
     ],
     "directory": "/workspaces/umfs",
-    "file": "/workspaces/umfs/operations/rmdir.c",
+    "file": "/workspaces/umfs/src/operations/rmdir.c",
     "output": "/workspaces/umfs/umfs"
   }
 ]
