@@ -104,8 +104,7 @@ int umfs_getattr(
             // /users/<name>/primary_group
             if (string_ends_with(path, "/primary_group") != 0) {
                 char *primary_group_name = get_user_primary_group_name(user);
-                snprintf(buffer, sizeof(buffer), "%d (%s)\n", user->gid,
-                    primary_group_name);
+                snprintf(buffer, sizeof(buffer), "%s\n", primary_group_name);
                 free(primary_group_name);
             }
             // /users/<name>/shell
@@ -124,8 +123,7 @@ int umfs_getattr(
                 || string_ends_with(path, "/shell") != 0
                 || string_ends_with(path, "/directory") != 0
                 || string_ends_with(path, "/primary_group") != 0
-                || string_ends_with(path, "/full_name") != 0
-                || string_ends_with(path, "/name") != 0;
+                || string_ends_with(path, "/full_name") != 0;
 
             stbuf->st_size = strlen(buffer);
             stbuf->st_mode = S_IFREG | 0666;
@@ -197,13 +195,12 @@ int umfs_getattr(
 
             bool file_valid = false;
             char buffer[100];
-            // /groups/<name>/gid
-            if (string_ends_with(path, "/gid") != 0) {
+            // /groups/<name>/id
+            if (string_ends_with(path, "/id") != 0) {
                 snprintf(buffer, sizeof(buffer), "%d\n", group->gid);
             }
 
-            file_valid = string_ends_with(path, "/gid") != 0
-                || string_ends_with(path, "/name") != 0;
+            file_valid = string_ends_with(path, "/id") != 0;
 
             stbuf->st_mode = S_IFREG | 0666;
             stbuf->st_size = strlen(buffer);

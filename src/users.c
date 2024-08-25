@@ -48,6 +48,7 @@ User *copy_user(User *source_user)
         new_user->groups[i] = strdup(source_user->groups[i]);
     }
     new_user->groups_count = source_user->groups_count;
+    new_user->sudo = source_user->sudo;
 
     return new_user;
 }

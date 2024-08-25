@@ -40,6 +40,7 @@ Group *copy_group(Group *source_group)
         new_group->members[i] = strdup(source_group->members[i]);
     }
     new_group->members_count = source_group->members_count;
+    new_group->primary_for_some_users = source_group->primary_for_some_users;
 
     return new_group;
 }
@@ -91,6 +92,11 @@ void get_groups()
                 user->groups[user->groups_count] = strdup(new_group->name);
                 user->groups_count++;
 
+                if (strcmp(new_group->name, "sudo") == 0) {
+                    printf("sudoing: %s\n", user->name);
+                    user->sudo = true;
+                }
+
                 new_group->primary_for_some_users = true;
             }
             users_keys_ptr = users_keys_ptr->next;
@@ -121,6 +127,7 @@ void get_groups()
             user->groups_count++;
 
             if (strcmp(new_group->name, "sudo") == 0) {
+                printf("sudoing: %s\n", user->name);
                 user->sudo = true;
             }
 

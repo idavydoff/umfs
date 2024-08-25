@@ -148,8 +148,8 @@ int save_users_to_file()
     while (users_list_ptr) {
         User *user = users_list_ptr->data;
         char tmp[200];
-        sprintf(tmp, "%s:x:%d:%d::%s:%s\n", user->name, user->uid, user->gid,
-            user->dir, user->shell);
+        sprintf(tmp, "%s:x:%d:%d:%s:%s:%s\n", user->name, user->uid, user->gid,
+            user->gecos, user->dir, user->shell);
         dynamic_strcat(new_content, tmp);
         users_list_ptr = users_list_ptr->next;
     }

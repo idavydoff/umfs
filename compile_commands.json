@@ -278,5 +278,25 @@
     "directory": "/workspaces/umfs",
     "file": "/workspaces/umfs/src/operations/rmdir.c",
     "output": "/workspaces/umfs/umfs"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-g",
+      "-fsanitize=address",
+      "-I/usr/local/include/fuse3",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-o",
+      "umfs",
+      "./src/operations/write.c"
+    ],
+    "directory": "/workspaces/umfs",
+    "file": "/workspaces/umfs/src/operations/write.c",
+    "output": "/workspaces/umfs/umfs"
   }
 ]

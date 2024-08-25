@@ -19,5 +19,7 @@ int umfs_getattr(
 int umfs_mkdir(const char *path, mode_t mode);
 int umfs_rename(const char *path, const char *new_path, unsigned int flags);
 int umfs_rmdir(const char *path);
+int umfs_write(const char *path, const char *text, size_t size, off_t off,
+    struct fuse_file_info *fi);
 
 #endif
