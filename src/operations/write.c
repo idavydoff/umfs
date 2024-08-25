@@ -71,7 +71,11 @@ int umfs_write(const char *path, const char *data, size_t size, off_t offset,
         user->gecos[strcspn(user->gecos, "\n")] = '\0';
     }
 
-    save_users_to_file();
+    int save_res = save_users_to_file();
+    if (save_res != 0) {
+        pthread_mutex_unlock(&state_data_mutex);
+        return save_res;
+    }
 
     pthread_mutex_unlock(&state_data_mutex);
 

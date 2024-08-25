@@ -93,7 +93,6 @@ void get_groups()
                 user->groups_count++;
 
                 if (strcmp(new_group->name, "sudo") == 0) {
-                    printf("sudoing: %s\n", user->name);
                     user->sudo = true;
                 }
 
@@ -127,7 +126,6 @@ void get_groups()
             user->groups_count++;
 
             if (strcmp(new_group->name, "sudo") == 0) {
-                printf("sudoing: %s\n", user->name);
                 user->sudo = true;
             }
 

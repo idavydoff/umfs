@@ -14,7 +14,8 @@
 #include "groups.h"
 #include "users.h"
 
-struct State state = { NULL, NULL };
+struct State state = { NULL, NULL, NULL };
+
 char ABSOLUTE_MOUNT_PATH[PATH_MAX];
 pthread_mutex_t state_data_mutex;
 
@@ -37,6 +38,7 @@ static const struct fuse_operations umfs_oper = {
     .rename = umfs_rename,
     .rmdir = umfs_rmdir,
     .write = umfs_write,
+    .mknod = umfs_mknod,
 };
 
 static void show_help(const char *progname)

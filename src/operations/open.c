@@ -11,6 +11,17 @@ int umfs_open(const char *path, struct fuse_file_info *fi)
 {
     printf("Open: %s\n", path);
 
+    pthread_mutex_lock(&state_data_mutex);
+    if (state.fake_file_path != NULL) {
+        if (strcmp(path, state.fake_file_path) == 0) {
+            free(state.fake_file_path);
+            state.fake_file_path = NULL;
+            pthread_mutex_unlock(&state_data_mutex);
+            return 0;
+        }
+    }
+    pthread_mutex_unlock(&state_data_mutex);
+
     if ((fi->flags & O_ACCMODE) != O_RDONLY && startsWith(path, "/users/")) {
         char *name = get_item_name_from_path(path, "/users/");
         pthread_mutex_lock(&state_data_mutex);

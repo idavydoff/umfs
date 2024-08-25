@@ -10,20 +10,21 @@
 #include "../groups.h"
 #include "../users.h"
 
-uid_t create_dir(char *name)
+uid_t create_group(char *name)
 {
     pthread_mutex_lock(&state_data_mutex);
     if (g_hash_table_contains(state.groups, name)) {
         pthread_mutex_unlock(&state_data_mutex);
         return 0;
     }
-    pthread_mutex_unlock(&state_data_mutex);
 
     uid_t gid = get_avalable_gid();
 
     FILE *fp = fopen("/etc/group", "a");
     fprintf(fp, "%s:x:%d:\n", name, gid);
     fclose(fp);
+
+    pthread_mutex_unlock(&state_data_mutex);
 
     return gid;
 }
@@ -49,13 +50,13 @@ int umfs_mkdir(const char *path, mode_t mode)
         pthread_mutex_unlock(&state_data_mutex);
 
         uid_t uid = get_avalable_uid();
-        uid_t gid = create_dir(name);
+        uid_t gid = create_group(name);
 
         short int group_suffix = 1;
         while (gid == 0) {
             char tmp[100];
             sprintf(tmp, "%s%d", name, group_suffix);
-            gid = create_dir(tmp);
+            gid = create_group(tmp);
             group_suffix++;
         }
 
@@ -81,7 +82,7 @@ int umfs_mkdir(const char *path, mode_t mode)
         }
         char *name = path_dup + strlen("/groups/");
 
-        uid_t gid = create_dir(name);
+        uid_t gid = create_group(name);
 
         if (gid == 0) {
             return -EADDRINUSE;

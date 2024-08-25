@@ -56,12 +56,21 @@ int umfs_rmdir(const char *path)
 
         g_list_free(groups_keys);
 
-        if (groups_modified)
-            save_groups_to_file();
+        if (groups_modified) {
+            int save_res = save_groups_to_file();
+            if (save_res != 0) {
+                pthread_mutex_unlock(&state_data_mutex);
+                return save_res;
+            }
+        }
 
         g_hash_table_remove(state.users, name);
 
-        save_users_to_file();
+        int save_res = save_users_to_file();
+        if (save_res != 0) {
+            pthread_mutex_unlock(&state_data_mutex);
+            return save_res;
+        }
 
         deleted = true;
     }
@@ -86,7 +95,11 @@ int umfs_rmdir(const char *path)
 
         free(name);
 
-        save_groups_to_file();
+        int save_res = save_groups_to_file();
+        if (save_res != 0) {
+            pthread_mutex_unlock(&state_data_mutex);
+            return save_res;
+        }
 
         deleted = true;
     }

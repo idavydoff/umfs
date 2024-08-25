@@ -1,3 +1,4 @@
+#include <string.h>
 #define FUSE_USE_VERSION 31
 
 #include <fuse.h>
@@ -16,6 +17,18 @@ int umfs_getattr(
     printf("Get attr: %s\n", path);
 
     memset(stbuf, 0, sizeof(struct stat));
+
+    pthread_mutex_lock(&state_data_mutex);
+    if (state.fake_file_path != NULL) {
+        if (strcmp(path, state.fake_file_path) == 0) {
+            stbuf->st_size = 1;
+            stbuf->st_mode = S_IFREG | 0666;
+            stbuf->st_nlink = 1;
+            pthread_mutex_unlock(&state_data_mutex);
+            return 0;
+        }
+    }
+    pthread_mutex_unlock(&state_data_mutex);
 
     if (strcmp(path, "/") == 0) {
         stbuf->st_mode = S_IFDIR | 0755;
@@ -172,11 +185,21 @@ int umfs_getattr(
             // /groups/<name>/members/<member_name>
             if (startsWith(path + strlen("/groups/"), members_dir_name)) {
                 char *user_name = get_path_end(path);
+
                 bool file_valid = false;
+                bool user_in_members = false;
+
+                for (short i = 0; i < group->members_count; i++) {
+                    if (strcmp(group->members[i], user_name) == 0) {
+                        user_in_members = true;
+                        break;
+                    }
+                }
 
                 User *user = g_hash_table_lookup(state.users, user_name);
+                free(user_name);
 
-                if (user) {
+                if (user != NULL && user_in_members) {
                     if (user->gid == group->gid) {
                         stbuf->st_size = 1;
                     } else {
@@ -186,8 +209,6 @@ int umfs_getattr(
                     stbuf->st_nlink = 1;
                     file_valid = true;
                 }
-
-                free(user_name);
 
                 pthread_mutex_unlock(&state_data_mutex);
                 return file_valid ? 0 : -ENOENT;

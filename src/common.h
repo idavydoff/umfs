@@ -29,6 +29,7 @@ typedef struct Group {
 typedef struct State {
     GHashTable *users;
     GHashTable *groups;
+    char *fake_file_path;
 } State;
 
 extern struct State state;

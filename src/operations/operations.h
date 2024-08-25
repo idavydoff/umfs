@@ -21,5 +21,6 @@ int umfs_rename(const char *path, const char *new_path, unsigned int flags);
 int umfs_rmdir(const char *path);
 int umfs_write(const char *path, const char *text, size_t size, off_t off,
     struct fuse_file_info *fi);
+int umfs_mknod(const char *path, mode_t mode, dev_t dev);
 
 #endif
