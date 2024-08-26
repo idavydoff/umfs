@@ -22,5 +22,6 @@ int umfs_rmdir(const char *path);
 int umfs_write(const char *path, const char *text, size_t size, off_t off,
     struct fuse_file_info *fi);
 int umfs_mknod(const char *path, mode_t mode, dev_t dev);
+int umfs_unlink(const char *path);
 
 #endif

@@ -39,6 +39,7 @@ static const struct fuse_operations umfs_oper = {
     .rmdir = umfs_rmdir,
     .write = umfs_write,
     .mknod = umfs_mknod,
+    .unlink = umfs_unlink,
 };
 
 static void show_help(const char *progname)
