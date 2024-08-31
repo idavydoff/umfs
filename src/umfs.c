@@ -21,10 +21,15 @@ pthread_mutex_t state_data_mutex;
 
 static struct options {
     int show_help;
+    int has_gid;
+    int has_allow_other;
+    int has_default_permissions;
 } options;
 
-struct fuse_opt option_spec[]
-    = { OPTION("-h", show_help), OPTION("--help", show_help), FUSE_OPT_END };
+struct fuse_opt option_spec[] = { OPTION("-h", show_help),
+    OPTION("--help", show_help), OPTION("gid=", has_gid),
+    OPTION("allow_other", has_allow_other),
+    OPTION("default_permissions", has_default_permissions), FUSE_OPT_END };
 
 static const struct fuse_operations umfs_oper = {
     .init = umfs_init,
@@ -56,8 +61,24 @@ int main(int argc, char *argv[])
 
     int ret;
     struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
-    if (fuse_opt_parse(&args, &options, option_spec, NULL) == -1)
+    if (fuse_opt_parse(&args, &options, option_spec, NULL) == -1) {
+        fuse_opt_free_args(&args);
+        pthread_mutex_destroy(&state_data_mutex);
         return 1;
+    }
+
+    printf("%d, %d, %d\n", options.has_allow_other,
+        options.has_default_permissions, options.has_gid);
+
+    if (options.has_allow_other
+        && (!options.has_default_permissions || !options.has_gid)) {
+        fuse_opt_free_args(&args);
+        pthread_mutex_destroy(&state_data_mutex);
+        puts("umfs: with allow_other enabled you should alse specify "
+             "\"default_permission\" and \"gid\" options.");
+
+        return 1;
+    }
 
     if (options.show_help) {
         show_help(argv[0]);

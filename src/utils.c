@@ -158,6 +158,7 @@ int save_users_to_file()
 
     FILE *fp = fopen("/etc/passwd", "w");
     if (fp == NULL) {
+        free(new_content);
         return -EIO;
     }
 

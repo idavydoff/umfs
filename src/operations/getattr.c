@@ -1,4 +1,5 @@
 #include <string.h>
+#include <sys/stat.h>
 #define FUSE_USE_VERSION 31
 
 #include <fuse.h>
@@ -60,7 +61,7 @@ int umfs_getattr(
             // /users/<name>
             if (strcmp(path + strlen("/users/"), name) == 0) {
                 if (user->sudo) {
-                    stbuf->st_mode = S_IFDIR | 1755;
+                    stbuf->st_mode = S_IFDIR | S_ISVTX | 0755;
                 } else {
                     stbuf->st_mode = S_IFDIR | 0755;
                 }
@@ -139,7 +140,7 @@ int umfs_getattr(
                 || string_ends_with(path, "/full_name") != 0;
 
             stbuf->st_size = strlen(buffer);
-            stbuf->st_mode = S_IFREG | 0666;
+            stbuf->st_mode = S_IFREG | 0664;
             stbuf->st_nlink = 1;
 
             pthread_mutex_unlock(&state_data_mutex);
@@ -159,7 +160,7 @@ int umfs_getattr(
             // /groups/<name>
             if (strcmp(path + strlen("/groups/"), name) == 0) {
                 if (group->primary_for_some_users) {
-                    stbuf->st_mode = S_IFDIR | 1755;
+                    stbuf->st_mode = S_IFDIR | S_ISVTX | 0755;
                 } else {
                     stbuf->st_mode = S_IFDIR | 0755;
                 }
@@ -223,7 +224,7 @@ int umfs_getattr(
 
             file_valid = string_ends_with(path, "/id") != 0;
 
-            stbuf->st_mode = S_IFREG | 0666;
+            stbuf->st_mode = S_IFREG | 0664;
             stbuf->st_size = strlen(buffer);
             stbuf->st_nlink = 1;
 
