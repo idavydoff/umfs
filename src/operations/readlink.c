@@ -3,7 +3,8 @@
 #include <fuse.h>
 #include <stdio.h>
 
-#include "../common.h"
+#include "../umfs.h"
+#include "../utils.h"
 
 int umfs_readlink(const char *path, char *buf, size_t buf_size)
 {

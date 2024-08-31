@@ -7,9 +7,10 @@
 #include <fuse.h>
 #include <stdio.h>
 
-#include "../common.h"
 #include "../groups.h"
+#include "../umfs.h"
 #include "../users.h"
+#include "../utils.h"
 
 int umfs_rmdir(const char *path)
 {

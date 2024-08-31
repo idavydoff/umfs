@@ -7,7 +7,8 @@
 #include <fuse.h>
 #include <stdio.h>
 
-#include "../common.h"
+#include "../umfs.h"
+#include "../utils.h"
 
 int umfs_mknod(const char *path, mode_t mode, dev_t dev)
 {

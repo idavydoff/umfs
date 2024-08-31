@@ -7,9 +7,10 @@
 #include <fuse.h>
 #include <stdio.h>
 
-#include "../common.h"
 #include "../groups.h"
+#include "../umfs.h"
 #include "../users.h"
+#include "../utils.h"
 
 static int rename_user_in_groups(const char *old_name, const char *new_name)
 {

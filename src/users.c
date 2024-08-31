@@ -4,7 +4,8 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "common.h"
+#include "umfs.h"
+#include "utils.h"
 
 void free_user(void *user)
 {

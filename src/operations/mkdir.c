@@ -6,25 +6,25 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "../common.h"
 #include "../groups.h"
+#include "../umfs.h"
 #include "../users.h"
+#include "../utils.h"
 
 uid_t create_group(char *name)
 {
-    pthread_mutex_lock(&state_data_mutex);
     if (g_hash_table_contains(state.groups, name)) {
-        pthread_mutex_unlock(&state_data_mutex);
         return 0;
     }
 
     uid_t gid = get_avalable_gid();
 
     FILE *fp = fopen("/etc/group", "a");
+    if (fp == NULL) {
+        return 1;
+    }
     fprintf(fp, "%s:x:%d:\n", name, gid);
     fclose(fp);
-
-    pthread_mutex_unlock(&state_data_mutex);
 
     return gid;
 }
@@ -38,17 +38,20 @@ int umfs_mkdir(const char *path, mode_t mode)
 
     if (startsWith(path, "/users/")) {
         if (strchr(path + strlen("/users/"), '/')) {
+            free(path_dup);
             return -EADDRNOTAVAIL;
         }
         char *name = path_dup + strlen("/users/");
 
         pthread_mutex_lock(&state_data_mutex);
         if (g_hash_table_contains(state.users, name)) {
+            free(path_dup);
             pthread_mutex_unlock(&state_data_mutex);
             return -EADDRINUSE;
         }
         pthread_mutex_unlock(&state_data_mutex);
 
+        pthread_mutex_lock(&state_data_mutex);
         uid_t uid = get_avalable_uid();
         uid_t gid = create_group(name);
 
@@ -57,10 +60,19 @@ int umfs_mkdir(const char *path, mode_t mode)
             char tmp[100];
             sprintf(tmp, "%s%d", name, group_suffix);
             gid = create_group(tmp);
+            if (gid == 1) {
+                pthread_mutex_unlock(&state_data_mutex);
+                return -EIO;
+            }
             group_suffix++;
         }
+        pthread_mutex_unlock(&state_data_mutex);
 
         FILE *fp = fopen("/etc/passwd", "a");
+        if (fp == NULL) {
+            free(path_dup);
+            return -EIO;
+        }
         fprintf(fp, "%s:x:%d:%d::/home/%s:/bin/bash\n", name, uid, gid, name);
         fclose(fp);
 
@@ -78,14 +90,21 @@ int umfs_mkdir(const char *path, mode_t mode)
 
     if (startsWith(path, "/groups/")) {
         if (strchr(path + strlen("/groups/"), '/')) {
+            free(path_dup);
             return -EADDRNOTAVAIL;
         }
         char *name = path_dup + strlen("/groups/");
 
+        pthread_mutex_lock(&state_data_mutex);
         uid_t gid = create_group(name);
+        pthread_mutex_unlock(&state_data_mutex);
 
         if (gid == 0) {
+            free(path_dup);
             return -EADDRINUSE;
+        } else if (gid == 1) {
+            free(path_dup);
+            return -EIO;
         }
 
         created = true;

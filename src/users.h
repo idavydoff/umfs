@@ -1,4 +1,4 @@
-#include "common.h"
+#include "umfs.h"
 #include <sys/types.h>
 
 #ifndef USERS /* Include guard */

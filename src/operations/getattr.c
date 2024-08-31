@@ -7,9 +7,10 @@
 #include <limits.h> /* PATH_MAX */
 #include <stdio.h>
 
-#include "../common.h"
 #include "../groups.h"
+#include "../umfs.h"
 #include "../users.h"
+#include "../utils.h"
 
 int umfs_getattr(
     const char *path, struct stat *stbuf, struct fuse_file_info *fi)

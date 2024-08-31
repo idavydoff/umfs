@@ -10,7 +10,6 @@
 #include <string.h>
 
 #include "./operations/operations.h"
-#include "common.h"
 #include "groups.h"
 #include "users.h"
 
@@ -25,6 +24,8 @@ static struct options {
     int has_allow_other;
     int has_default_permissions;
 } options;
+
+#define OPTION(t, p) { t, offsetof(struct options, p), 1 }
 
 struct fuse_opt option_spec[] = { OPTION("-h", show_help),
     OPTION("--help", show_help), OPTION("gid=", has_gid),
@@ -66,9 +67,6 @@ int main(int argc, char *argv[])
         pthread_mutex_destroy(&state_data_mutex);
         return 1;
     }
-
-    printf("%d, %d, %d\n", options.has_allow_other,
-        options.has_default_permissions, options.has_gid);
 
     if (options.has_allow_other
         && (!options.has_default_permissions || !options.has_gid)) {

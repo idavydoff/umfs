@@ -5,7 +5,8 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "common.h"
+#include "umfs.h"
+#include "utils.h"
 
 void free_group(void *ptr)
 {
@@ -92,7 +93,8 @@ void get_groups()
                 user->groups[user->groups_count] = strdup(new_group->name);
                 user->groups_count++;
 
-                if (strcmp(new_group->name, "sudo") == 0 || strcmp(new_group->name, "wheel") == 0) {
+                if (strcmp(new_group->name, "sudo") == 0
+                    || strcmp(new_group->name, "wheel") == 0) {
                     user->sudo = true;
                 }
 
@@ -125,7 +127,8 @@ void get_groups()
             user->groups[user->groups_count] = strdup(grp->gr_name);
             user->groups_count++;
 
-            if (strcmp(new_group->name, "sudo") == 0 || strcmp(new_group->name, "wheel") == 0) {
+            if (strcmp(new_group->name, "sudo") == 0
+                || strcmp(new_group->name, "wheel") == 0) {
                 user->sudo = true;
             }
 

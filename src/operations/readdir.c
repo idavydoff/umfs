@@ -6,9 +6,10 @@
 
 #include <stdio.h>
 
-#include "../common.h"
 #include "../groups.h"
+#include "../umfs.h"
 #include "../users.h"
+#include "../utils.h"
 
 int umfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     off_t offset, struct fuse_file_info *fi, enum fuse_readdir_flags flags)

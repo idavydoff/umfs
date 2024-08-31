@@ -3,8 +3,8 @@
 #include <fuse.h>
 #include <stdio.h>
 
-#include "../common.h"
 #include "../groups.h"
+#include "../umfs.h"
 #include "../users.h"
 
 int umfs_opendir(const char *path, struct fuse_file_info *fi)

@@ -7,9 +7,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../common.h"
 #include "../groups.h"
+#include "../umfs.h"
 #include "../users.h"
+#include "../utils.h"
 
 int umfs_read(const char *path, char *buf, size_t size, off_t offset,
     struct fuse_file_info *fi)

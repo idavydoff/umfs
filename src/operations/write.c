@@ -7,8 +7,9 @@
 #include <fuse.h>
 #include <stdio.h>
 
-#include "../common.h"
+#include "../umfs.h"
 #include "../users.h"
+#include "../utils.h"
 
 int umfs_write(const char *path, const char *data, size_t size, off_t offset,
     struct fuse_file_info *fi)
