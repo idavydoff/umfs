@@ -1,3 +1,4 @@
+#include <linux/limits.h>
 #include <string.h>
 #include <sys/stat.h>
 #define FUSE_USE_VERSION 31
@@ -33,17 +34,17 @@ int umfs_getattr(
     pthread_mutex_unlock(&state_data_mutex);
 
     if (strcmp(path, "/") == 0) {
-        stbuf->st_mode = S_IFDIR | 0755;
+        stbuf->st_mode = S_IFDIR | 0555;
         stbuf->st_nlink = 4;
         return 0;
     } else if (strcmp(path, "/users") == 0) {
-        stbuf->st_mode = S_IFDIR | 0755;
+        stbuf->st_mode = S_IFDIR | 0775;
         pthread_mutex_lock(&state_data_mutex);
         stbuf->st_nlink = 2 + g_hash_table_size(state.users);
         pthread_mutex_unlock(&state_data_mutex);
         return 0;
     } else if (strcmp(path, "/groups") == 0) {
-        stbuf->st_mode = S_IFDIR | 0755;
+        stbuf->st_mode = S_IFDIR | 0775;
         pthread_mutex_lock(&state_data_mutex);
         stbuf->st_nlink = 2 + g_hash_table_size(state.groups);
         pthread_mutex_unlock(&state_data_mutex);
@@ -61,7 +62,7 @@ int umfs_getattr(
 
             // /users/<name>
             if (strcmp(path + strlen("/users/"), name) == 0) {
-                if (user->sudo) {
+                if (user->privileged) {
                     stbuf->st_mode = S_IFDIR | S_ISVTX | 0755;
                 } else {
                     stbuf->st_mode = S_IFDIR | 0755;
@@ -134,13 +135,47 @@ int umfs_getattr(
             if (string_ends_with(path, "/full_name") != 0) {
                 snprintf(buffer, sizeof(buffer), "%s\n", user->gecos);
             }
+            // /users/<name>/ssh_authorized_keys
+            if ((string_ends_with(path, "/ssh_authorized_keys") != 0)
+                && user->is_home_dir) {
+                char home_ssh_dir[PATH_MAX];
+                snprintf(home_ssh_dir, PATH_MAX, "%s/.ssh", user->dir);
+
+                struct stat ssh_dir_stat;
+                int stat_res = stat(home_ssh_dir, &ssh_dir_stat);
+
+                if (stat_res != 0) {
+                    stbuf->st_size = 0;
+                }
+
+                char home_authorized_keys_file[PATH_MAX];
+                snprintf(home_authorized_keys_file, PATH_MAX,
+                    "%s/.ssh/authorized_keys", user->dir);
+
+                struct stat ssh_authorized_keys_file_stat;
+                stat_res = stat(
+                    home_authorized_keys_file, &ssh_authorized_keys_file_stat);
+
+                if (stat_res != 0) {
+                    stbuf->st_size = 0;
+                } else {
+                    stbuf->st_size = ssh_authorized_keys_file_stat.st_size;
+                }
+            }
+
             file_valid = string_ends_with(path, "/id") != 0
                 || string_ends_with(path, "/shell") != 0
                 || string_ends_with(path, "/directory") != 0
                 || string_ends_with(path, "/primary_group") != 0
-                || string_ends_with(path, "/full_name") != 0;
+                || string_ends_with(path, "/full_name") != 0
+                || (user->is_home_dir
+                        ? string_ends_with(path, "/ssh_authorized_keys") != 0
+                        : false);
 
-            stbuf->st_size = strlen(buffer);
+            if (!((string_ends_with(path, "/ssh_authorized_keys") != 0)
+                    && user->is_home_dir)) {
+                stbuf->st_size = strlen(buffer);
+            }
             stbuf->st_mode = S_IFREG | 0664;
             stbuf->st_nlink = 1;
 

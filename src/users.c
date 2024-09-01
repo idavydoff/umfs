@@ -49,7 +49,8 @@ User *copy_user(User *source_user)
         new_user->groups[i] = strdup(source_user->groups[i]);
     }
     new_user->groups_count = source_user->groups_count;
-    new_user->sudo = source_user->sudo;
+    new_user->privileged = source_user->privileged;
+    new_user->is_home_dir = source_user->is_home_dir;
 
     return new_user;
 }
@@ -73,7 +74,8 @@ void get_users()
         new_user->gid = p->pw_gid;
         new_user->dir = strdup(p->pw_dir);
         new_user->shell = strdup(p->pw_shell);
-        new_user->sudo = false;
+        new_user->privileged = strcmp(new_user->name, "root") == 0;
+        new_user->is_home_dir = startsWith(new_user->dir, "/home");
 
         new_user->groups = malloc(5 * sizeof(char *));
         new_user->groups_count = 0;

@@ -95,7 +95,7 @@ void get_groups()
 
                 if (strcmp(new_group->name, "sudo") == 0
                     || strcmp(new_group->name, "wheel") == 0) {
-                    user->sudo = true;
+                    user->privileged = true;
                 }
 
                 new_group->primary_for_some_users = true;
@@ -129,7 +129,7 @@ void get_groups()
 
             if (strcmp(new_group->name, "sudo") == 0
                 || strcmp(new_group->name, "wheel") == 0) {
-                user->sudo = true;
+                user->privileged = true;
             }
 
             grp->gr_mem++;

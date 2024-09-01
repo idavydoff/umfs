@@ -11,9 +11,10 @@ typedef struct User {
     uid_t gid;
     char *shell;
     char *dir;
+    bool is_home_dir;
     char **groups;
     int groups_count;
-    bool sudo;
+    bool privileged;
 } User;
 
 typedef struct Group {

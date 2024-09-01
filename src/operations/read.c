@@ -31,7 +31,7 @@ int umfs_read(const char *path, char *buf, size_t size, off_t offset,
             return -ENOENT;
         }
 
-        char buffer[100];
+        char buffer[10000];
         if (string_ends_with(path, "/directory") != 0) {
             snprintf(buffer, sizeof(buffer), "%s\n", user->dir);
         }
@@ -49,6 +49,36 @@ int umfs_read(const char *path, char *buf, size_t size, off_t offset,
         if (string_ends_with(path, "/full_name") != 0) {
             snprintf(buffer, sizeof(buffer), "%s\n", user->gecos);
         }
+        if ((string_ends_with(path, "/ssh_authorized_keys") != 0)
+            && user->is_home_dir) {
+            char home_ssh_dir[PATH_MAX];
+            snprintf(home_ssh_dir, PATH_MAX, "%s/.ssh", user->dir);
+
+            struct stat ssh_dir_stat;
+            int stat_res = stat(home_ssh_dir, &ssh_dir_stat);
+
+            if (stat_res == 0) {
+                char home_authorized_keys_file[PATH_MAX];
+                snprintf(home_authorized_keys_file, PATH_MAX,
+                    "%s/.ssh/authorized_keys", user->dir);
+
+                struct stat ssh_authorized_keys_file_stat;
+                stat_res = stat(
+                    home_authorized_keys_file, &ssh_authorized_keys_file_stat);
+
+                if (stat_res == 0) {
+                    FILE *fp = fopen(home_authorized_keys_file, "r");
+                    if (fp == NULL) {
+                        pthread_mutex_unlock(&state_data_mutex);
+                        return 0;
+                    }
+
+                    fread(buffer, 1, ssh_authorized_keys_file_stat.st_size, fp);
+                    fclose(fp);
+                }
+            }
+        }
+
         len = strlen(buffer);
         if (offset < len) {
             if (offset + size > len)

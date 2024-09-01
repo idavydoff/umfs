@@ -58,10 +58,12 @@ int umfs_write(const char *path, const char *data, size_t size, off_t offset,
         // что делали изменения. Соответственно пользователь для этой папки
         // увидит старое значение.
         char *old_primary_group_name = get_user_primary_group_name(user);
-        if (strcmp(group->name, "sudo") == 0) {
-            user->sudo = true;
-        } else if (strcmp(old_primary_group_name, "sudo") == 0) {
-            user->sudo = false;
+        if (strcmp(group->name, "sudo") == 0
+            || (strcmp(group->name, "wheel")) == 0) {
+            user->privileged = true;
+        } else if (strcmp(old_primary_group_name, "sudo") == 0
+            || strcmp(old_primary_group_name, "wheel") == 0) {
+            user->privileged = false;
         }
 
         free(old_primary_group_name);
@@ -70,6 +72,40 @@ int umfs_write(const char *path, const char *data, size_t size, off_t offset,
         user->gecos = realloc(user->gecos, (size + 1) * sizeof(char));
         memcpy(user->gecos, data, size);
         user->gecos[strcspn(user->gecos, "\n")] = '\0';
+    }
+    if ((string_ends_with(path, "/ssh_authorized_keys") != 0)
+        && user->is_home_dir) {
+        char home_ssh_dir[PATH_MAX];
+        snprintf(home_ssh_dir, PATH_MAX, "%s/.ssh", user->dir);
+
+        struct stat ssh_dir_stat;
+        int stat_res = stat(home_ssh_dir, &ssh_dir_stat);
+
+        if (stat_res != 0) {
+            mkdir(home_ssh_dir, 0700);
+        }
+
+        char home_authorized_keys_file[PATH_MAX];
+        snprintf(home_authorized_keys_file, PATH_MAX, "%s/.ssh/authorized_keys",
+            user->dir);
+
+        struct stat ssh_authorized_keys_file_stat;
+        stat_res
+            = stat(home_authorized_keys_file, &ssh_authorized_keys_file_stat);
+
+        FILE *fp = fopen(home_authorized_keys_file, "w");
+        if (fp == NULL) {
+            pthread_mutex_unlock(&state_data_mutex);
+            free(file_name);
+            return -EIO;
+        }
+
+        fwrite(data, 1, size, fp);
+        fclose(fp);
+
+        pthread_mutex_unlock(&state_data_mutex);
+        free(file_name);
+        return size;
     }
 
     int save_res = save_users_to_file();

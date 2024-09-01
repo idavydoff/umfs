@@ -28,9 +28,9 @@ static struct options {
 #define OPTION(t, p) { t, offsetof(struct options, p), 1 }
 
 struct fuse_opt option_spec[] = { OPTION("-h", show_help),
-    OPTION("--help", show_help), OPTION("gid=", has_gid),
-    OPTION("allow_other", has_allow_other),
-    OPTION("default_permissions", has_default_permissions), FUSE_OPT_END };
+    OPTION("--help", show_help), OPTION("-o gid=%d", has_gid),
+    OPTION("-o allow_other", has_allow_other),
+    OPTION("-o default_permissions", has_default_permissions), FUSE_OPT_END };
 
 static const struct fuse_operations umfs_oper = {
     .init = umfs_init,
@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
 
     int ret;
     struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
+
     if (fuse_opt_parse(&args, &options, option_spec, NULL) == -1) {
         fuse_opt_free_args(&args);
         pthread_mutex_destroy(&state_data_mutex);

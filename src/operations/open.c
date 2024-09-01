@@ -36,7 +36,10 @@ int umfs_open(const char *path, struct fuse_file_info *fi)
         bool can_write = string_ends_with(path, "/directory") != 0
             || string_ends_with(path, "/shell") != 0
             || string_ends_with(path, "/primary_group") != 0
-            || string_ends_with(path, "/full_name") != 0;
+            || string_ends_with(path, "/full_name") != 0
+            || (user->is_home_dir
+                    ? string_ends_with(path, "/ssh_authorized_keys") != 0
+                    : false);
 
         if (can_write)
             return 0;

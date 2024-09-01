@@ -49,6 +49,7 @@ int umfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
         filler(buf, "directory", NULL, 0, 0);
         filler(buf, "groups", NULL, 0, 0);
         filler(buf, "full_name", NULL, 0, 0);
+        filler(buf, "ssh_authorized_keys", NULL, 0, 0);
 
         return 0;
     }
